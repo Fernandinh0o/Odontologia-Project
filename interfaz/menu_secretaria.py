@@ -9,6 +9,8 @@ from interfaz.usuarios_controlador import (
 )
 from modelos.producto import Producto
 
+#Como no se donde va a estar todo, de momento aqui se maneja practicamente todo, inventario usuarios y demas.
+"""Aqui esta conectado tkinter, controlador, gestores, modelos, base de datos"""
 
 def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
     if rol not in {"Secretaria", "Empleado"}:

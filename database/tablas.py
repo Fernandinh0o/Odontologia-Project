@@ -2,7 +2,8 @@ import sqlite3
 from sqlite3 import Error
 
 from .conexion import crear_conexion
-
+""" Va para empezar aqui se utiliza SQL y genera un init.py de manera OBLIGATORIA asi que no deberia ocurrir algun 
+error pero sepa"""
 
 def crear_tablas_iniciales():
     """
@@ -53,3 +54,6 @@ def crear_tablas_iniciales():
                 conn.close()
     else:
         print("Error: No se pudo crear la conexión a la base de datos.")
+
+""" Este modulo no inserta o crea de una vez los usuarios solo hace las tablas si no existen,
+si ya existen no pasa nada. Mas que todo se uso para crear las tablas y ya"""

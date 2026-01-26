@@ -1,7 +1,7 @@
 from sqlite3 import Error
 
 from database.conexion import crear_conexion
-
+#Crear conexion abre la conexion con la base de datos y reusa el modulo de la conexion.
 
 def registrar_producto(producto):
     """Registra un producto en la base de datos.

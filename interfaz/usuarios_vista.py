@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-
+#Aqui se van a mostrar las ventas, mensajes etc.
 from interfaz.menu_admin import mostrar_menu_admin
 from interfaz.menu_secretaria import mostrar_menu_secretaria
 from interfaz.usuarios_controlador import autenticar
@@ -21,7 +21,7 @@ def login(root):
     entry_user.pack()
 
     tk.Label(ventana, text="Contraseña").pack(pady=5)
-    entry_pwd = tk.Entry(ventana, show="*")
+    entry_pwd = tk.Entry(ventana, show="*") #Oculta la contraseña
     entry_pwd.pack()
 
     def ingresar():
@@ -32,20 +32,20 @@ def login(root):
             messagebox.showerror("Error", "Complete todos los campos")
             return
 
-        datos = autenticar(usuario, pwd)
+        datos = autenticar(usuario, pwd) #Mira si en el controlador esta bien
 
         if datos:
             _, nombre, rol = datos
             messagebox.showinfo("Acceso", f"Bienvenido {nombre}\nRol: {rol}")
-            ventana.withdraw()
-            menu_principal(ventana, rol)
+            ventana.withdraw()  #Se esconde el login
+            menu_principal(ventana, rol) # Abre el menu segun dependiendo el rol
         else:
             messagebox.showerror("Error", "Credenciales incorrectas")
 
     tk.Button(ventana, text="Ingresar", command=ingresar).pack(pady=15)
 
 
-def menu_principal(root, rol):
+def menu_principal(root, rol): #Dependiendo el rol muestra el menu.
     def cerrar_app():
         root.destroy()
 
@@ -78,3 +78,5 @@ def menu_principal(root, rol):
     if rol == "Usuario":
         tk.Label(ventana, text="Acceso de usuario").pack(pady=5)
         tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=5)
+
+"""Aqui no se hashean las contraseñas, ni se manejan usuarios y tampoco tiene SQL"""

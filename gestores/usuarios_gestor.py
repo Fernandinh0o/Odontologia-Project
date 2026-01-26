@@ -2,12 +2,14 @@ from database.conexion import crear_conexion
 from modelos.usuario import Usuario
 from utils.helpers import hash_contrasena, verificar_contrasena
 
+""" Este modulo crea las tablas relacionadas con los usuarios, ademas inserta los usuarios, lista y elimina usuarios
+practicamente es la conexion con la base de datos y la interfaz"""
 
-def inicializar_bd():
+def inicializar_bd(): #Verifica la base de datos. y la conecta
     conn = crear_conexion()
     cursor = conn.cursor()
 
-    _migrar_usuarios(cursor)
+    _migrar_usuarios(cursor) #Adapta otras versiones de la tabla de usuarios para no perder datos.
 
     cursor.execute(
         """
