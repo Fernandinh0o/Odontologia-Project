@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 
-def mostrar_menu_admin(root, cerrar_app):
+def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
     ventana = tk.Toplevel()
     ventana.title("Menú Administrador")
     ventana.geometry("300x250")
@@ -14,6 +14,6 @@ def mostrar_menu_admin(root, cerrar_app):
 
     tk.Button(ventana, text="Agenda", command=mostrar_en_desarrollo).pack(pady=5)
     tk.Button(ventana, text="Pacientes", command=mostrar_en_desarrollo).pack(pady=5)
-    tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=5)
+    tk.Button(ventana, text="Cerrar Sesión", command=cerrar_sesion).pack(pady=5)
 
-    ventana.protocol("WM_DELETE_WINDOW", cerrar_app)
+    ventana.protocol("WM_DELETE_WINDOW", cerrar_sesion)

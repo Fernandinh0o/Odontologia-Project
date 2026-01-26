@@ -10,7 +10,7 @@ from interfaz.usuarios_controlador import (
 from modelos.producto import Producto
 
 
-def mostrar_menu_secretaria(root, cerrar_app, rol):
+def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
     if rol not in {"Secretaria", "Empleado"}:
         messagebox.showerror(
             "Acceso denegado",
@@ -34,9 +34,9 @@ def mostrar_menu_secretaria(root, cerrar_app, rol):
         text="Inventario",
         command=gestor_inventario,
     ).pack(pady=5)
-    tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=5)
+    tk.Button(ventana, text="Cerrar Sesión", command=cerrar_sesion).pack(pady=5)
 
-    ventana.protocol("WM_DELETE_WINDOW", cerrar_app)
+    ventana.protocol("WM_DELETE_WINDOW", cerrar_sesion)
 
 
 def gestor_usuarios():

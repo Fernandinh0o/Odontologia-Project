@@ -49,11 +49,17 @@ def menu_principal(root, rol):
     def cerrar_app():
         root.destroy()
 
+    def cerrar_sesion():
+        for widget in root.winfo_children():
+            widget.destroy()
+        root.deiconify()
+        login(root)
+
     if rol in {"Secretaria", "Empleado"}:
-        mostrar_menu_secretaria(root, cerrar_app, rol)
+        mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion)
         return
     if rol == "Odontologo":
-        mostrar_menu_admin(root, cerrar_app)
+        mostrar_menu_admin(root, cerrar_app, cerrar_sesion)
         return
 
     ventana = tk.Toplevel()
