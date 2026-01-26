@@ -62,6 +62,9 @@ def menu_principal(rol):
         tk.Button(ventana, text="Agenda").pack(pady=5)
         tk.Button(ventana, text="Pacientes").pack(pady=5)
         tk.Button(ventana, text="Salir", command=ventana.destroy).pack(pady=5)
+    elif rol == "Usuario":
+        tk.Label(ventana, text="Acceso de usuario").pack(pady=5)
+        tk.Button(ventana, text="Salir", command=ventana.destroy).pack(pady=5)
 
 from modulos.users.usuarios_controlador import (
     listar_usuarios,
