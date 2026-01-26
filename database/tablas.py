@@ -23,13 +23,11 @@ def crear_tablas_iniciales():
     # 2. Tabla de Productos
     sql_tabla_productos = """
     CREATE TABLE IF NOT EXISTS Productos (
-        id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
-        sku TEXT NOT NULL UNIQUE,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre TEXT NOT NULL,
-        descripcion TEXT,
-        precio_compra REAL NOT NULL,
-        precio_venta REAL NOT NULL,
-        stock INTEGER NOT NULL DEFAULT 0
+        cantidad INTEGER NOT NULL,
+        precio REAL NOT NULL,
+        descripcion TEXT
     );
     """
 

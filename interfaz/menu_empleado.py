@@ -1,24 +1,38 @@
 import tkinter as tk
 from tkinter import messagebox
 
+from gestores.gestor_inventario import registrar_producto
 from interfaz.usuarios_controlador import (
     borrar_usuario,
     listar_usuarios,
     registrar_usuario,
 )
+from modelos.producto import Producto
 
 
-def mostrar_menu_empleado(root, cerrar_app):
+def mostrar_menu_empleado(root, cerrar_app, rol):
+    if rol not in {"Empleado", "Secretaria"}:
+        messagebox.showerror(
+            "Acceso denegado",
+            "Esta vista solo está disponible para usuarios con rol Empleado.",
+        )
+        return
+
     ventana = tk.Toplevel()
     ventana.title("Menú Empleado")
     ventana.geometry("300x250")
 
-    tk.Label(ventana, text="Rol: Secretaria", font=("Arial", 12)).pack(pady=10)
+    tk.Label(ventana, text="Rol: Empleado", font=("Arial", 12)).pack(pady=10)
 
     tk.Button(
         ventana,
         text="Gestor de Usuarios",
         command=gestor_usuarios,
+    ).pack(pady=5)
+    tk.Button(
+        ventana,
+        text="Inventario",
+        command=gestor_inventario,
     ).pack(pady=5)
     tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=5)
 
@@ -103,3 +117,62 @@ def gestor_usuarios():
     tk.Button(frame_btn, text="Eliminar", command=eliminar).grid(row=0, column=1, padx=5)
 
     cargar()
+
+
+def gestor_inventario():
+    ventana = tk.Toplevel()
+    ventana.title("Inventario")
+    ventana.geometry("400x250")
+
+    frame_form = tk.Frame(ventana)
+    frame_form.pack(pady=10)
+
+    tk.Label(frame_form, text="Nombre").grid(row=0, column=0, sticky="e")
+    tk.Label(frame_form, text="Cantidad").grid(row=1, column=0, sticky="e")
+    tk.Label(frame_form, text="Precio").grid(row=2, column=0, sticky="e")
+
+    entry_nombre = tk.Entry(frame_form)
+    entry_cantidad = tk.Entry(frame_form)
+    entry_precio = tk.Entry(frame_form)
+
+    entry_nombre.grid(row=0, column=1)
+    entry_cantidad.grid(row=1, column=1)
+    entry_precio.grid(row=2, column=1)
+
+    def guardar():
+        nombre = entry_nombre.get().strip()
+        cantidad = entry_cantidad.get().strip()
+        precio = entry_precio.get().strip()
+
+        if not nombre or not cantidad or not precio:
+            messagebox.showerror("Error", "Todos los campos son obligatorios")
+            return
+
+        try:
+            cantidad_int = int(cantidad)
+            precio_float = float(precio)
+        except ValueError:
+            messagebox.showerror(
+                "Error",
+                "Cantidad y precio deben ser valores numéricos válidos",
+            )
+            return
+
+        producto = Producto(
+            nombre=nombre,
+            cantidad=cantidad_int,
+            precio=precio_float,
+        )
+
+        try:
+            registrar_producto(producto)
+        except Exception as exc:
+            messagebox.showerror("Error", str(exc))
+            return
+
+        messagebox.showinfo("OK", "Producto registrado")
+        entry_nombre.delete(0, tk.END)
+        entry_cantidad.delete(0, tk.END)
+        entry_precio.delete(0, tk.END)
+
+    tk.Button(ventana, text="Guardar", command=guardar).pack(pady=10)

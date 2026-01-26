@@ -63,8 +63,8 @@ def menu_principal(root, rol):
 
     ventana.protocol("WM_DELETE_WINDOW", cerrar_app)
 
-    if rol == "Secretaria":
-        mostrar_menu_empleado(root, cerrar_app)
+    if rol in {"Secretaria", "Empleado"}:
+        mostrar_menu_empleado(root, cerrar_app, rol)
     elif rol == "Odontologo":
         mostrar_menu_admin(root, cerrar_app)
     elif rol == "Usuario":
