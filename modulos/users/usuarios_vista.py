@@ -45,11 +45,16 @@ def menu_principal(rol):
 
     if rol == "Secretaria":
         tk.Button(
-    tk.Button(
+            ventana,
+            text="Gestor de Usuarios",
+            command=gestor_usuarios
+        ).pack(pady=5)
+        tk.Button(ventana, text="Salir", command=ventana.destroy).pack(pady=5)
 
     elif rol == "Odontologo":
         tk.Button(ventana, text="Agenda").pack(pady=5)
         tk.Button(ventana, text="Pacientes").pack(pady=5)
+        tk.Button(ventana, text="Salir", command=ventana.destroy).pack(pady=5)
 
 from modulos.users.usuarios_controlador import (
     listar_usuarios,
