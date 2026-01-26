@@ -1,6 +1,7 @@
 import sqlite3
 DB_NAME = "clinica.db"
 
+#Gestión de Accesos
 class Usuario:
     def __init__(self, nombre, telefono, rol, contraseña, id_usuario = None):
         self.id_usuario = id_usuario
@@ -78,3 +79,30 @@ class Odontologo(Usuario):
                 (self.id_usuario, self.especialidad, self.no_colegiado)
             )
             self.id_odontologo = cursor.lastrowid
+
+#Inventario
+class Proveedor:
+    def __init__(self, nombre, telefono, id_proveedor= None):
+        self.nombre = nombre
+        self.telefono = telefono
+        self.id_proveedor = id_proveedor
+
+    @staticmethod
+    def crear_tabla():
+        with sqlite3.connect(DB_NAME) as conn:
+            conn.execute("""
+                   CREATE TABLE IF NOT EXISTS proveedores (
+                       id_proveedor INTEGER PRIMARY KEY AUTOINCREMENT, 
+                       nombre TEXT NOT NULL,
+                       telefono TEXT
+                   );
+               """)
+
+    def guardar(self):
+        with sqlite3.connect(DB_NAME) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO proveedores (nombre, telefono) VALUES (?,?)",
+                (self.nombre, self.telefono)
+            )
+            self.id_proveedor = cursor.lastrowid
