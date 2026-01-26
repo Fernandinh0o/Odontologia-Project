@@ -43,11 +43,12 @@ def menu_principal(rol):
 
     tk.Label(ventana, text=f"Rol: {rol}", font=("Arial", 12)).pack(pady=10)
 
+    if rol in {"Usuario", "Secretaria"}:
+        tk.Button(ventana, text="Pacientes").pack(pady=5)
     if rol == "Secretaria":
         tk.Button(ventana, text="Usuarios").pack(pady=5)
-        tk.Button(ventana, text="Pacientes").pack(pady=5)
         tk.Button(ventana, text="Citas").pack(pady=5)
 
-    elif rol == "Odontologo":
+    elif rol in {"Odontologo", "Odontologa"}:
         tk.Button(ventana, text="Agenda").pack(pady=5)
         tk.Button(ventana, text="Pacientes").pack(pady=5)
