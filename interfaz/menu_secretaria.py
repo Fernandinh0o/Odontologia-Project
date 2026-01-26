@@ -1,7 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
-from gestores.gestor_inventario import registrar_producto
+from gestores.gestor_inventario import obtener_productos, registrar_producto
 from interfaz.usuarios_controlador import (
     borrar_usuario,
     listar_usuarios,
@@ -33,6 +33,11 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
         ventana,
         text="Inventario",
         command=gestor_inventario,
+    ).pack(pady=5)
+    tk.Button(
+        ventana,
+        text="Ver Inventario",
+        command=mostrar_inventario,
     ).pack(pady=5)
     tk.Button(ventana, text="Cerrar Sesión", command=cerrar_sesion).pack(pady=5)
 
@@ -176,3 +181,41 @@ def gestor_inventario():
         entry_precio.delete(0, tk.END)
 
     tk.Button(ventana, text="Guardar", command=guardar).pack(pady=10)
+
+
+def mostrar_inventario():
+    ventana = tk.Toplevel()
+    ventana.title("Inventario - Productos")
+    ventana.geometry("700x350")
+
+    frame_tabla = tk.Frame(ventana)
+    frame_tabla.pack(fill="both", expand=True, padx=10, pady=10)
+
+    columnas = ("id", "nombre", "cantidad", "precio", "descripcion")
+    tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings")
+    tabla.heading("id", text="ID")
+    tabla.heading("nombre", text="Nombre")
+    tabla.heading("cantidad", text="Cantidad")
+    tabla.heading("precio", text="Precio")
+    tabla.heading("descripcion", text="Descripción")
+
+    tabla.column("id", width=60, anchor="center")
+    tabla.column("nombre", width=160, anchor="w")
+    tabla.column("cantidad", width=90, anchor="center")
+    tabla.column("precio", width=90, anchor="center")
+    tabla.column("descripcion", width=220, anchor="w")
+
+    scrollbar = ttk.Scrollbar(frame_tabla, orient="vertical", command=tabla.yview)
+    tabla.configure(yscrollcommand=scrollbar.set)
+
+    tabla.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    try:
+        productos = obtener_productos()
+    except Exception as exc:
+        messagebox.showerror("Error", str(exc))
+        return
+
+    for producto in productos:
+        tabla.insert("", "end", values=producto)
