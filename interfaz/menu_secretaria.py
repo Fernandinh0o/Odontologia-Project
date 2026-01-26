@@ -10,19 +10,19 @@ from interfaz.usuarios_controlador import (
 from modelos.producto import Producto
 
 
-def mostrar_menu_empleado(root, cerrar_app, rol):
-    if rol not in {"Empleado", "Secretaria"}:
+def mostrar_menu_secretaria(root, cerrar_app, rol):
+    if rol not in {"Secretaria", "Empleado"}:
         messagebox.showerror(
             "Acceso denegado",
-            "Esta vista solo está disponible para usuarios con rol Empleado.",
+            "Esta vista solo está disponible para usuarios con rol Secretaria.",
         )
         return
 
     ventana = tk.Toplevel()
-    ventana.title("Menú Empleado")
+    ventana.title("Menú Secretaria")
     ventana.geometry("300x250")
 
-    tk.Label(ventana, text="Rol: Empleado", font=("Arial", 12)).pack(pady=10)
+    tk.Label(ventana, text="Rol: Secretaria", font=("Arial", 12)).pack(pady=10)
 
     tk.Button(
         ventana,

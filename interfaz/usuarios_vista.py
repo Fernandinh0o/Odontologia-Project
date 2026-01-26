@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from interfaz.menu_admin import mostrar_menu_admin
-from interfaz.menu_empleado import mostrar_menu_empleado
+from interfaz.menu_secretaria import mostrar_menu_secretaria
 from interfaz.usuarios_controlador import autenticar
 
 
@@ -46,6 +46,16 @@ def login(root):
 
 
 def menu_principal(root, rol):
+    def cerrar_app():
+        root.destroy()
+
+    if rol in {"Secretaria", "Empleado"}:
+        mostrar_menu_secretaria(root, cerrar_app, rol)
+        return
+    if rol == "Odontologo":
+        mostrar_menu_admin(root, cerrar_app)
+        return
+
     ventana = tk.Toplevel()
     ventana.title("Menú Principal")
     ventana.geometry("300x250")
@@ -55,18 +65,10 @@ def menu_principal(root, rol):
     def ejecutar():
         messagebox.showinfo("Ejecutar", "Función en desarrollo")
 
-    def cerrar_app():
-        ventana.destroy()
-        root.destroy()
-
     tk.Button(ventana, text="▶ Ejecutar", command=ejecutar).pack(pady=5)
 
     ventana.protocol("WM_DELETE_WINDOW", cerrar_app)
 
-    if rol in {"Secretaria", "Empleado"}:
-        mostrar_menu_empleado(root, cerrar_app, rol)
-    elif rol == "Odontologo":
-        mostrar_menu_admin(root, cerrar_app)
-    elif rol == "Usuario":
+    if rol == "Usuario":
         tk.Label(ventana, text="Acceso de usuario").pack(pady=5)
         tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=5)

@@ -5,10 +5,12 @@ from gestores.usuarios_gestor import (
     login,
     obtener_usuarios,
 )
+from database.tablas import crear_tablas_iniciales
 from modelos.usuario import Usuario
 
 
 def iniciar_sistema():
+    crear_tablas_iniciales()
     inicializar_bd()
 
 
