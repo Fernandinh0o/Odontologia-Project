@@ -33,3 +33,24 @@ def registrar_producto(producto):
     finally:
         # Cerrar la conexión para liberar recursos.
         conn.close()
+
+
+def obtener_productos():
+    """Obtiene todos los productos registrados en la base de datos."""
+    # Extrae los datos para mostrarlos en la interfaz.
+    conn = crear_conexion()
+    # Extrae los datos para la interfaz de inventario.
+    if conn is None:
+        raise Error("No se pudo establecer conexión con la base de datos.")
+
+    try:
+        # Ejecuta la consulta para recuperar los productos.
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Productos")
+        return cursor.fetchall()
+    except Error as exc:
+        # Reporta el error de consulta si la operación falla.
+        raise Error(f"Error al obtener los productos: {exc}") from exc
+    finally:
+        # Cierra la conexión para liberar recursos.
+        conn.close()
