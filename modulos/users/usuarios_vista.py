@@ -9,10 +9,15 @@ if str(ROOT_DIR) not in sys.path:
 
 from modulos.users.usuarios_controlador import autenticar
 
-def login():
-    ventana = tk.Toplevel()
+def login(root):
+    ventana = root
     ventana.title("Login")
     ventana.geometry("300x200")
+
+    def cerrar_app():
+        ventana.destroy()
+
+    ventana.protocol("WM_DELETE_WINDOW", cerrar_app)
 
     tk.Label(ventana, text="Usuario").pack(pady=5)
     entry_user = tk.Entry(ventana)
@@ -35,20 +40,31 @@ def login():
         if datos:
             _, nombre, rol = datos
             messagebox.showinfo("Acceso", f"Bienvenido {nombre}\nRol: {rol}")
-            ventana.destroy()
-            menu_principal(rol)
+            ventana.withdraw()
+            menu_principal(ventana, rol)
         else:
             messagebox.showerror("Error", "Credenciales incorrectas")
 
     tk.Button(ventana, text="Ingresar", command=ingresar).pack(pady=15)
 
 
-def menu_principal(rol):
+def menu_principal(root, rol):
     ventana = tk.Toplevel()
     ventana.title("Menú Principal")
     ventana.geometry("300x250")
 
     tk.Label(ventana, text=f"Rol: {rol}", font=("Arial", 12)).pack(pady=10)
+
+    def ejecutar():
+        messagebox.showinfo("Ejecutar", "Función en desarrollo")
+
+    def cerrar_app():
+        ventana.destroy()
+        root.destroy()
+
+    tk.Button(ventana, text="▶ Ejecutar", command=ejecutar).pack(pady=5)
+
+    ventana.protocol("WM_DELETE_WINDOW", cerrar_app)
 
     if rol == "Secretaria":
         tk.Button(
@@ -56,15 +72,15 @@ def menu_principal(rol):
             text="Gestor de Usuarios",
             command=gestor_usuarios
         ).pack(pady=5)
-        tk.Button(ventana, text="Salir", command=ventana.destroy).pack(pady=5)
+        tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=5)
 
     elif rol == "Odontologo":
         tk.Button(ventana, text="Agenda").pack(pady=5)
         tk.Button(ventana, text="Pacientes").pack(pady=5)
-        tk.Button(ventana, text="Salir", command=ventana.destroy).pack(pady=5)
+        tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=5)
     elif rol == "Usuario":
         tk.Label(ventana, text="Acceso de usuario").pack(pady=5)
-        tk.Button(ventana, text="Salir", command=ventana.destroy).pack(pady=5)
+        tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=5)
 
 from modulos.users.usuarios_controlador import (
     listar_usuarios,

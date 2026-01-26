@@ -2,12 +2,11 @@ import tkinter as tk
 from modulos.users.usuarios_controlador import iniciar_sistema
 from modulos.users.usuarios_vista import login
 
-def main():
+def main(root):
     iniciar_sistema()
-    login()
+    login(root)
+
 
 root = tk.Tk()
-root.withdraw()
-
-main()
+main(root)
 root.mainloop()
