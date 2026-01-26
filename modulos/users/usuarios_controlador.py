@@ -18,3 +18,11 @@ def registrar_usuario(datos):
 
 def autenticar(nombre, contrasena):
     return login(nombre, contrasena)
+
+from modulos.users.usuarios_modelo import obtener_usuarios, eliminar_usuario
+
+def listar_usuarios():
+    return obtener_usuarios()
+
+def borrar_usuario(id_usuario):
+    eliminar_usuario(id_usuario)

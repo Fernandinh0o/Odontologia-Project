@@ -10,7 +10,7 @@ def inicializar_bd():
         id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre TEXT NOT NULL UNIQUE,
         telefono TEXT,
-        rol TEXT CHECK(rol IN ('Usuario','Secretaria','Odontologo','Odontologa')) NOT NULL,
+        rol TEXT CHECK(rol IN ('Odontologo','Secretaria')) NOT NULL,
         contrasena TEXT NOT NULL
     )
     """)
@@ -41,7 +41,7 @@ def crear_usuario(nombre, telefono, rol, contrasena, especialidad=None):
 
     id_usuario = cursor.lastrowid
 
-    if rol in {"Odontologo", "Odontologa"}:
+    if rol == "Odontologo":
         cursor.execute("""
         INSERT INTO odontologos (id_usuario, especialidad)
         VALUES (?, ?)
@@ -70,3 +70,30 @@ def login(nombre, contrasena):
             return id_usuario, nombre, rol
 
     return None
+
+def obtener_usuarios():
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT id_usuario, nombre, telefono, rol
+    FROM usuarios
+    ORDER BY id_usuario
+    """)
+
+    datos = cursor.fetchall()
+    conn.close()
+    return datos
+
+
+def eliminar_usuario(id_usuario):
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    DELETE FROM usuarios
+    WHERE id_usuario = ?
+    """, (id_usuario,))
+
+    conn.commit()
+    conn.close()
