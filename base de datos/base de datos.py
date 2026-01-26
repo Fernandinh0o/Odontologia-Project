@@ -106,3 +106,42 @@ class Proveedor:
                 (self.nombre, self.telefono)
             )
             self.id_proveedor = cursor.lastrowid
+
+class Producto:
+    def __init__(self, id_proveedor, nombre, tipo, precio_compra, precio_venta, stock, id_producto = None):
+        self.id_producto = id_producto
+        self.id_proveedor = id_proveedor
+        self.nombre = nombre
+        self.tipo = tipo
+        self.precio_compra = precio_compra
+        self.precio_venta = precio_venta
+        self.stock = stock
+
+    @staticmethod
+    def crear_tabla():
+        Proveedor.crear_tabla()
+
+        with sqlite3.connect(DB_NAME) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS inventario (
+                    id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id_proveedor INTEGER,
+                    nombre TEXT NOT NULL,
+                    tipo TEXT,
+                    precio_compra REAL,
+                    precio_venta REAL,
+                    stock INTEGER DEFAULT 0,
+
+                    FOREIGN KEY(id_proveedor) REFERENCES proveedores(id_proveedor)
+                );
+            """)
+
+    def guardar(self):
+        conn = sqlite3.connect(DB_NAME)
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO inventario (id_proveedor, nombre, tipo, precio_compra, precio_venta, stock)
+                VALUES (?,?,?,?,?,?)
+            """, (self.id_proveedor, self.nombre, self.tipo, self.precio_compra, self.precio_venta, self.stock))
+            self.id_producto = cursor.lastrowid
