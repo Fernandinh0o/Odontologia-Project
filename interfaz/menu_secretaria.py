@@ -228,30 +228,38 @@ def gestor_inventario():
 
     tk.Label(frame_form, text="Nombre", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
              font=("Arial", 10, "bold")).grid(row=0, column=0, sticky="w", pady=10)
-    tk.Label(frame_form, text="Cantidad", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
+    tk.Label(frame_form, text="Stock", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
              font=("Arial", 10, "bold")).grid(row=1, column=0, sticky="w", pady=10)
     tk.Label(frame_form, text="Precio", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
              font=("Arial", 10, "bold")).grid(row=2, column=0, sticky="w", pady=10)
+    tk.Label(frame_form, text="Descripción", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
+             font=("Arial", 10, "bold")).grid(row=3, column=0, sticky="w", pady=10)
 
     entry_nombre = tk.Entry(frame_form, bd=0, font=("Arial", 12))
-    entry_cantidad = tk.Entry(frame_form, bd=0, font=("Arial", 12))
+    entry_stock = tk.Entry(frame_form, bd=0, font=("Arial", 12))
     entry_precio = tk.Entry(frame_form, bd=0, font=("Arial", 12))
+    entry_descripcion = tk.Entry(frame_form, bd=0, font=("Arial", 12))
+
 
     entry_nombre.grid(row=0, column=1, padx=15)
-    entry_cantidad.grid(row=1, column=1, padx=15)
+    entry_stock.grid(row=1, column=1, padx=15)
     entry_precio.grid(row=2, column=1, padx=15)
+    entry_descripcion.grid(row=3, column=1, padx=15)
+
+
 
     def guardar():
         nombre = entry_nombre.get().strip()
-        cantidad = entry_cantidad.get().strip()
+        stock = entry_stock.get().strip()
         precio = entry_precio.get().strip()
+        descripcion = entry_descripcion.get().strip()
 
-        if not nombre or not cantidad or not precio:
+        if not nombre or not stock or not precio or not descripcion:
             messagebox.showerror("Error", "Todos los campos son obligatorios")
             return
 
         try:
-            cantidad_int = int(cantidad)
+            cantidad_int = int(stock)
             precio_float = float(precio)
         except ValueError:
             messagebox.showerror("Error", "Cantidad y precio deben ser números válidos")
@@ -261,6 +269,7 @@ def gestor_inventario():
             nombre=nombre,
             cantidad=cantidad_int,
             precio=precio_float,
+            descripcion=descripcion
         )
 
         try:
@@ -271,7 +280,7 @@ def gestor_inventario():
 
         messagebox.showinfo("OK", "Producto registrado")
         entry_nombre.delete(0, tk.END)
-        entry_cantidad.delete(0, tk.END)
+        entry_stock.delete(0, tk.END)
         entry_precio.delete(0, tk.END)
 
     _boton(panel, "Guardar", guardar, x=60, y=360, w=180, h=35)
@@ -293,20 +302,35 @@ def mostrar_inventario():
 
     panel, ancho_panel, _ = _crear_panel(ventana, "Inventario - Productos")
 
-    frame_tabla = tk.Frame(panel, bg=ROSA_SUAVE)
-    frame_tabla.place(x=30, y=90, width=ancho_panel - 60, height=310)
+    frame_filtros = tk.Frame(panel, bg=ROSA_SUAVE)
+    frame_filtros.place(x=30, y=70, width=ancho_panel - 60, height=40)
 
-    columnas = ("id", "nombre", "cantidad", "precio", "descripcion")
+    tk.Label(frame_filtros, text="Buscar:", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
+             font=("Arial", 10, "bold")).pack(side="left", padx=5)
+
+    entry_buscar = tk.Entry(frame_filtros, font=("Arial", 10))
+    entry_buscar.pack(side="left", padx=5, fill="x", expand=True)
+
+    var_stock_bajo = tk.BooleanVar()
+    check_bajo = tk.Checkbutton(frame_filtros, text="Solo Stock Bajo (< 5)",
+                                variable=var_stock_bajo, bg=ROSA_SUAVE,
+                                activebackground=ROSA_SUAVE, font=("Arial", 9))
+    check_bajo.pack(side="left", padx=10)
+
+    frame_tabla = tk.Frame(panel, bg=ROSA_SUAVE)
+    frame_tabla.place(x=30, y=120, width=ancho_panel - 60, height=310)
+
+    columnas = ("id", "nombre", "stock", "precio", "descripcion")
     tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings")
     tabla.heading("id", text="ID")
     tabla.heading("nombre", text="Nombre")
-    tabla.heading("cantidad", text="Cantidad")
+    tabla.heading("stock", text="Stock")
     tabla.heading("precio", text="Precio")
     tabla.heading("descripcion", text="Descripción")
 
     tabla.column("id", width=60, anchor="center")
     tabla.column("nombre", width=200, anchor="w")
-    tabla.column("cantidad", width=100, anchor="center")
+    tabla.column("stock", width=100, anchor="center")
     tabla.column("precio", width=100, anchor="center")
     tabla.column("descripcion", width=260, anchor="w")
 
@@ -316,20 +340,42 @@ def mostrar_inventario():
     tabla.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    try:
-        productos = obtener_productos()
-    except Exception as exc:
-        messagebox.showerror("Error", str(exc))
-        return
+    def ejecutar_busqueda():
+        for item in tabla.get_children():
+            tabla.delete(item)
 
-    for producto in productos:
-        tabla.insert("", "end", values=producto)
+        try:
+            todos = obtener_productos()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            return
+
+        texto = entry_buscar.get().lower()
+        solo_bajo = var_stock_bajo.get()
+
+        for prod in todos:
+            nombre_prod = str(prod[1]).lower()
+            cantidad_prod = int(prod[2])
+
+            if texto and texto not in nombre_prod:
+                continue  # Saltamos este producto
+
+            if solo_bajo and cantidad_prod > 5:
+                continue  # Saltamos este producto
+
+            tabla.insert("", "end", values=prod)
+
+
+    btn_buscar = tk.Button(frame_filtros, text="🔍", bg=MORADO, fg=TEXTO_CLARO,
+                           font=("Arial", 9, "bold"), command=ejecutar_busqueda)
+    btn_buscar.pack(side="left", padx=5)
+
+    entry_buscar.bind("<Return>", lambda e: ejecutar_busqueda())
+
+    ejecutar_busqueda()
 
     _boton(panel, "Cerrar", ventana.destroy, x=30, y=410, w=180, h=35)
 
-    tk.Button(
-        panel, text="X",
-        bg=MORADO, fg=TEXTO_CLARO,
-        bd=0, font=("Arial", 10, "bold"),
-        command=ventana.destroy
-    ).place(x=ancho_panel - 55, y=20, width=35, height=28)
+    tk.Button(panel, text="X", bg=MORADO, fg=TEXTO_CLARO, bd=0,
+              font=("Arial", 10, "bold"), command=ventana.destroy
+              ).place(x=ancho_panel - 55, y=20, width=35, height=28)
