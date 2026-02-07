@@ -1,10 +1,26 @@
 class Producto:
-    """ Aqui se define lo que vendria siendo el producto, de momento como no se conocen todos los 
-    parametros solo es un borrador por decir asi."""
-    
-    def __init__(self, nombre, cantidad, precio, descripcion="", id_producto=None):
-        self.id = id_producto
+    """Define la estructura del producto para el inventario."""
+
+    def __init__(
+        self,
+        id_producto,
+        nombre,
+        categoria,
+        cantidad,
+        precio_unitario,
+        stock_minimo,
+        proveedor,
+        descripcion="",
+        estado="",
+        valor_total=0.0,
+    ):
+        self.id_producto = id_producto
         self.nombre = nombre
+        self.categoria = categoria
         self.cantidad = cantidad
-        self.precio = precio
+        self.precio_unitario = precio_unitario
+        self.stock_minimo = stock_minimo
+        self.proveedor = proveedor
         self.descripcion = descripcion
+        self.estado = estado
+        self.valor_total = valor_total
