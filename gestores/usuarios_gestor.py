@@ -15,7 +15,7 @@ def inicializar_bd(): #Verifica la base de datos. y la conecta
         """
         CREATE TABLE IF NOT EXISTS usuarios (
             id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL UNIQUE,
+            nombre_usuario TEXT NOT NULL UNIQUE,
             telefono TEXT,
             rol TEXT CHECK(rol IN ('Odontologo','Secretaria','Usuario')) NOT NULL,
             contrasena TEXT NOT NULL
@@ -72,7 +72,7 @@ def _migrar_usuarios(cursor):
         """
         CREATE TABLE usuarios (
             id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL UNIQUE,
+            nombre_usuario TEXT NOT NULL UNIQUE,
             telefono TEXT,
             rol TEXT CHECK(rol IN ('Odontologo','Secretaria','Usuario')) NOT NULL,
             contrasena TEXT NOT NULL
@@ -122,7 +122,7 @@ def _asegurar_usuarios_base(cursor):
 
     for usuario in usuarios_base:
         cursor.execute(
-            "SELECT 1 FROM usuarios WHERE nombre = ?",
+            "SELECT 1 FROM usuarios WHERE nombre_usuario = ?",
             (usuario.nombre,),
         )
         if cursor.fetchone():
@@ -131,7 +131,7 @@ def _asegurar_usuarios_base(cursor):
         pwd_hash = hash_contrasena(usuario.contrasena)
         cursor.execute(
             """
-            INSERT INTO usuarios (nombre, telefono, rol, contrasena)
+            INSERT INTO usuarios (nombre_usuario, telefono, rol, password_hash)
             VALUES (?, ?, ?, ?)
             """,
             (usuario.nombre, usuario.telefono, usuario.rol, pwd_hash),
@@ -183,9 +183,9 @@ def login(nombre, contrasena):
 
     cursor.execute(
         """
-        SELECT id_usuario, nombre, rol, contrasena
+        SELECT id_usuario, nombre_usuario, rol, password_hash
         FROM usuarios
-        WHERE nombre = ?
+        WHERE nombre_usuario = ?
         """,
         (nombre,),
     )
@@ -207,7 +207,7 @@ def obtener_usuarios():
 
     cursor.execute(
         """
-        SELECT id_usuario, nombre, telefono, rol
+        SELECT id_usuario, nombre_usuario, telefono, rol
         FROM usuarios
         ORDER BY id_usuario
         """

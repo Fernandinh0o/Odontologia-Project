@@ -460,7 +460,9 @@ def mostrar_inventario():
 
         for prod in todos:
             nombre_prod = str(prod[1]).lower()
-            cantidad_prod = int(prod[2])
+            categoria_prod = str(prod[2])
+            cantidad_prod = int(prod[3])
+            precio_prod = float(prod[4])
 
             if texto_busqueda and texto_busqueda not in nombre_prod:
                 continue

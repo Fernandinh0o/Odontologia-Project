@@ -16,8 +16,9 @@ def crear_tablas_iniciales():
     CREATE TABLE IF NOT EXISTS Usuarios (
         id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre_usuario TEXT NOT NULL UNIQUE,
+        telefono TEXT,
         password_hash TEXT NOT NULL,
-        rol TEXT NOT NULL CHECK(rol IN ('Admin', 'Empleado'))
+        rol TEXT NOT NULL CHECK(rol IN ('Admin', 'Empleado','Secretaria','Odontologo','Usuario'))
     );
     """
 
