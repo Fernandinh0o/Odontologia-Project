@@ -286,7 +286,7 @@ def gestor_inventario():
             or not proveedor
         ):
             messagebox.showerror("Error", "Todos los campos son obligatorios")
-            return None
+            return
 
         try:
             id_producto_int = int(id_producto)
@@ -372,8 +372,39 @@ def mostrar_inventario():
 
     panel, ancho_panel, _ = _crear_panel(ventana, "Inventario - Productos")
 
+    frame_filtros = tk.Frame(panel, bg=ROSA_SUAVE)
+    frame_filtros.place(x=30, y=60, width=ancho_panel - 60, height=80)
+
+    tk.Label(frame_filtros, text="Buscar:", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
+             font=("Arial", 10, "bold")).place(x=0, y=5)
+
+    entry_buscar = tk.Entry(frame_filtros, font=("Arial", 10))
+    entry_buscar.place(x=60, y=5, width=200)
+
+    var_stock_bajo = tk.BooleanVar()
+    check_bajo = tk.Checkbutton(frame_filtros, text="Solo Stock Bajo (< 5)",
+                                variable=var_stock_bajo, bg=ROSA_SUAVE,
+                                activebackground=ROSA_SUAVE, font=("Arial", 9))
+    check_bajo.pack(side="right", padx=10)
+
+    tk.Label(frame_filtros, text="Ordenar por:", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
+             font=("Arial", 10, "bold")).place(x=0, y=40)
+
+    opciones_orden = [
+        "ID (Por defecto)",
+        "Nombre (A - Z)",
+        "Nombre (Z - A)",
+        "Precio (Mayor a Menor)",
+        "Precio (Menor a Mayor)",
+        "Cantidad (Mayor a Menor)",
+        "Cantidad (Menor a Mayor)"
+    ]
+    combo_orden = ttk.Combobox(frame_filtros, values=opciones_orden, state="readonly", font=("Arial", 9))
+    combo_orden.current(0)
+    combo_orden.place(x=100, y=40, width=180)
+
     frame_tabla = tk.Frame(panel, bg=ROSA_SUAVE)
-    frame_tabla.place(x=30, y=90, width=ancho_panel - 60, height=310)
+    frame_tabla.place(x=30, y=120, width=ancho_panel - 60, height=310)
 
     columnas = (
         "id",
@@ -410,20 +441,67 @@ def mostrar_inventario():
     tabla.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    try:
-        productos = obtener_productos()
-    except Exception as exc:
-        messagebox.showerror("Error", str(exc))
-        return
+    def ejecutar_busqueda():
+        for item in tabla.get_children():
+            tabla.delete(item)
 
-    for producto in productos:
-        tabla.insert("", "end", values=producto)
+        try:
+            todos = obtener_productos()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            return
+
+        texto_busqueda = entry_buscar.get().lower()
+        solo_bajo = var_stock_bajo.get()
+        criterio_orden = combo_orden.get()
+
+        lista_filtrada = []
+
+
+        for prod in todos:
+            nombre_prod = str(prod[1]).lower()
+            cantidad_prod = int(prod[2])
+
+            if texto_busqueda and texto_busqueda not in nombre_prod:
+                continue
+
+            if solo_bajo and cantidad_prod > 5:
+                continue
+            lista_filtrada.append(prod)
+
+        if criterio_orden == "Nombre (A - Z)":
+            lista_filtrada.sort(key=lambda x: x[1].lower())
+
+        elif criterio_orden == "Nombre (Z - A)":
+            lista_filtrada.sort(key=lambda x: x[1].lower(), reverse=True)
+
+        elif criterio_orden == "Precio (Mayor a Menor)":
+            lista_filtrada.sort(key=lambda x: x[3], reverse=True)
+
+        elif criterio_orden == "Precio (Menor a Mayor)":
+            lista_filtrada.sort(key=lambda x: x[3])
+
+        elif criterio_orden == "Cantidad (Mayor a Menor)":
+            lista_filtrada.sort(key=lambda x: x[2], reverse=True)
+
+        elif criterio_orden == "Cantidad (Menor a Mayor)":
+            lista_filtrada.sort(key=lambda x: x[2])
+
+
+        for prod in lista_filtrada:
+            tabla.insert("", "end", values=prod)
+    btn_buscar = tk.Button(frame_filtros, text="🔍", bg=MORADO, fg=TEXTO_CLARO,
+                           font=("Arial", 9, "bold"), command=ejecutar_busqueda)
+    btn_buscar.pack(side="right", padx=5)
+
+    entry_buscar.bind("<Return>", lambda e: ejecutar_busqueda())
+    combo_orden.bind("<<ComboboxSelected>>", lambda e: ejecutar_busqueda())
+    check_bajo.config(command=ejecutar_busqueda)
+
+    ejecutar_busqueda()
 
     _boton(panel, "Cerrar", ventana.destroy, x=30, y=410, w=180, h=35)
 
-    tk.Button(
-        panel, text="X",
-        bg=MORADO, fg=TEXTO_CLARO,
-        bd=0, font=("Arial", 10, "bold"),
-        command=ventana.destroy
-    ).place(x=ancho_panel - 55, y=20, width=35, height=28)
+    tk.Button(panel, text="X", bg=MORADO, fg=TEXTO_CLARO, bd=0,
+              font=("Arial", 10, "bold"), command=ventana.destroy
+              ).place(x=ancho_panel - 55, y=20, width=35, height=28)
