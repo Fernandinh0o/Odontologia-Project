@@ -36,6 +36,34 @@ def crear_tablas_iniciales():
     );
     """
 
+    # 3. Tabla de Ventas
+    sql_tabla_ventas = """
+    CREATE TABLE IF NOT EXISTS Ventas (
+        id_venta INTEGER PRIMARY KEY AUTOINCREMENT,
+        fecha_venta TEXT NOT NULL,
+        cliente TEXT NOT NULL,
+        usuario TEXT NOT NULL,
+        subtotal REAL NOT NULL,
+        impuesto REAL NOT NULL,
+        total REAL NOT NULL,
+        ruta_factura TEXT
+    );
+    """
+
+    # 4. Tabla de Detalle de Ventas
+    sql_tabla_detalle_ventas = """
+    CREATE TABLE IF NOT EXISTS DetalleVentas (
+        id_detalle INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_venta INTEGER NOT NULL,
+        id_producto INTEGER NOT NULL,
+        cantidad INTEGER NOT NULL,
+        precio_unitario REAL NOT NULL,
+        subtotal REAL NOT NULL,
+        FOREIGN KEY (id_venta) REFERENCES Ventas(id_venta),
+        FOREIGN KEY (id_producto) REFERENCES Productos(id_producto)
+    );
+    """
+
     sql_tabla_pacientes = """
         CREATE TABLE IF NOT EXISTS Pacientes (
             id_paciente INTEGER PRIMARY KEY,
@@ -98,6 +126,8 @@ def crear_tablas_iniciales():
             print("Creando/Verificando tablas...")
             cursor.execute(sql_tabla_usuarios)
             cursor.execute(sql_tabla_productos)
+            cursor.execute(sql_tabla_ventas)
+            cursor.execute(sql_tabla_detalle_ventas)
             cursor.execute(sql_tabla_pacientes)
             cursor.execute(sql_tabla_tratamientos)
             cursor.execute(sql_tabla_presupuestos)
