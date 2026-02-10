@@ -1,7 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from gestores.gestor_inventario import obtener_productos, registrar_producto
+from gestores.gestor_inventario import (
+    actualizar_producto,
+    obtener_productos,
+    registrar_producto,
+)
 from interfaz.usuarios_controlador import (
     borrar_usuario,
     listar_usuarios,
@@ -224,44 +228,106 @@ def gestor_inventario():
     panel, ancho_panel, _ = _crear_panel(ventana, "Inventario")
 
     frame_form = tk.Frame(panel, bg=ROSA_SUAVE)
-    frame_form.place(x=60, y=120, width=420, height=220)
+    frame_form.place(x=40, y=100, width=520, height=260)
 
-    tk.Label(frame_form, text="Nombre", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 10, "bold")).grid(row=0, column=0, sticky="w", pady=10)
-    tk.Label(frame_form, text="Cantidad", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 10, "bold")).grid(row=1, column=0, sticky="w", pady=10)
-    tk.Label(frame_form, text="Precio", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 10, "bold")).grid(row=2, column=0, sticky="w", pady=10)
+    def etiqueta(txt, r):
+        tk.Label(
+            frame_form,
+            text=txt,
+            bg=ROSA_SUAVE,
+            fg=TEXTO_GRIS,
+            font=("Arial", 10, "bold"),
+        ).grid(row=r, column=0, sticky="w", pady=6)
 
+    etiqueta("ID Producto", 0)
+    etiqueta("Nombre", 1)
+    etiqueta("Categoría", 2)
+    etiqueta("Cantidad", 3)
+    etiqueta("Precio Unitario", 4)
+    etiqueta("Stock Mínimo", 5)
+    etiqueta("Proveedor", 6)
+    etiqueta("Descripción", 7)
+
+    entry_id = tk.Entry(frame_form, bd=0, font=("Arial", 12))
     entry_nombre = tk.Entry(frame_form, bd=0, font=("Arial", 12))
+    entry_categoria = tk.Entry(frame_form, bd=0, font=("Arial", 12))
     entry_cantidad = tk.Entry(frame_form, bd=0, font=("Arial", 12))
     entry_precio = tk.Entry(frame_form, bd=0, font=("Arial", 12))
+    entry_stock = tk.Entry(frame_form, bd=0, font=("Arial", 12))
+    entry_proveedor = tk.Entry(frame_form, bd=0, font=("Arial", 12))
+    entry_descripcion = tk.Entry(frame_form, bd=0, font=("Arial", 12))
 
-    entry_nombre.grid(row=0, column=1, padx=15)
-    entry_cantidad.grid(row=1, column=1, padx=15)
-    entry_precio.grid(row=2, column=1, padx=15)
+    entry_id.grid(row=0, column=1, padx=15)
+    entry_nombre.grid(row=1, column=1, padx=15)
+    entry_categoria.grid(row=2, column=1, padx=15)
+    entry_cantidad.grid(row=3, column=1, padx=15)
+    entry_precio.grid(row=4, column=1, padx=15)
+    entry_stock.grid(row=5, column=1, padx=15)
+    entry_proveedor.grid(row=6, column=1, padx=15)
+    entry_descripcion.grid(row=7, column=1, padx=15)
 
-    def guardar():
+    def _leer_formulario():
+        id_producto = entry_id.get().strip()
         nombre = entry_nombre.get().strip()
+        categoria = entry_categoria.get().strip()
         cantidad = entry_cantidad.get().strip()
         precio = entry_precio.get().strip()
+        stock_minimo = entry_stock.get().strip()
+        proveedor = entry_proveedor.get().strip()
+        descripcion = entry_descripcion.get().strip()
 
-        if not nombre or not cantidad or not precio:
+        if (
+            not id_producto
+            or not nombre
+            or not categoria
+            or not cantidad
+            or not precio
+            or not stock_minimo
+            or not proveedor
+        ):
             messagebox.showerror("Error", "Todos los campos son obligatorios")
             return
 
         try:
+            id_producto_int = int(id_producto)
             cantidad_int = int(cantidad)
             precio_float = float(precio)
+            stock_minimo_int = int(stock_minimo)
         except ValueError:
-            messagebox.showerror("Error", "Cantidad y precio deben ser números válidos")
-            return
+            messagebox.showerror(
+                "Error",
+                "ID, cantidad, stock mínimo y precio deben ser numéricos válidos",
+            )
+            return None
 
-        producto = Producto(
+        return Producto(
+            id_producto=id_producto_int,
             nombre=nombre,
+            categoria=categoria,
             cantidad=cantidad_int,
-            precio=precio_float,
+            precio_unitario=precio_float,
+            stock_minimo=stock_minimo_int,
+            proveedor=proveedor,
+            descripcion=descripcion,
         )
+
+    def _limpiar():
+        for entry in (
+            entry_id,
+            entry_nombre,
+            entry_categoria,
+            entry_cantidad,
+            entry_precio,
+            entry_stock,
+            entry_proveedor,
+            entry_descripcion,
+        ):
+            entry.delete(0, tk.END)
+
+    def guardar():
+        producto = _leer_formulario()
+        if not producto:
+            return
 
         try:
             registrar_producto(producto)
@@ -270,12 +336,25 @@ def gestor_inventario():
             return
 
         messagebox.showinfo("OK", "Producto registrado")
-        entry_nombre.delete(0, tk.END)
-        entry_cantidad.delete(0, tk.END)
-        entry_precio.delete(0, tk.END)
+        _limpiar()
 
-    _boton(panel, "Guardar", guardar, x=60, y=360, w=180, h=35)
-    _boton(panel, "Cerrar", ventana.destroy, x=260, y=360, w=180, h=35)
+    def actualizar():
+        producto = _leer_formulario()
+        if not producto:
+            return
+
+        try:
+            actualizar_producto(producto)
+        except Exception as exc:
+            messagebox.showerror("Error", str(exc))
+            return
+
+        messagebox.showinfo("OK", "Producto actualizado")
+        _limpiar()
+
+    _boton(panel, "Guardar", guardar, x=60, y=375, w=160, h=35)
+    _boton(panel, "Actualizar", actualizar, x=240, y=375, w=160, h=35)
+    _boton(panel, "Cerrar", ventana.destroy, x=420, y=375, w=160, h=35)
 
     tk.Button(
         panel, text="X",
@@ -293,22 +372,68 @@ def mostrar_inventario():
 
     panel, ancho_panel, _ = _crear_panel(ventana, "Inventario - Productos")
 
-    frame_tabla = tk.Frame(panel, bg=ROSA_SUAVE)
-    frame_tabla.place(x=30, y=90, width=ancho_panel - 60, height=310)
+    frame_filtros = tk.Frame(panel, bg=ROSA_SUAVE)
+    frame_filtros.place(x=30, y=60, width=ancho_panel - 60, height=80)
 
-    columnas = ("id", "nombre", "cantidad", "precio", "descripcion")
+    tk.Label(frame_filtros, text="Buscar:", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
+             font=("Arial", 10, "bold")).place(x=0, y=5)
+
+    entry_buscar = tk.Entry(frame_filtros, font=("Arial", 10))
+    entry_buscar.place(x=60, y=5, width=200)
+
+    var_stock_bajo = tk.BooleanVar()
+    check_bajo = tk.Checkbutton(frame_filtros, text="Solo Stock Bajo (< 5)",
+                                variable=var_stock_bajo, bg=ROSA_SUAVE,
+                                activebackground=ROSA_SUAVE, font=("Arial", 9))
+    check_bajo.pack(side="right", padx=10)
+
+    tk.Label(frame_filtros, text="Ordenar por:", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
+             font=("Arial", 10, "bold")).place(x=0, y=40)
+
+    opciones_orden = [
+        "ID (Por defecto)",
+        "Nombre (A - Z)",
+        "Nombre (Z - A)",
+        "Precio (Mayor a Menor)",
+        "Precio (Menor a Mayor)",
+        "Cantidad (Mayor a Menor)",
+        "Cantidad (Menor a Mayor)"
+    ]
+    combo_orden = ttk.Combobox(frame_filtros, values=opciones_orden, state="readonly", font=("Arial", 9))
+    combo_orden.current(0)
+    combo_orden.place(x=100, y=40, width=180)
+
+    frame_tabla = tk.Frame(panel, bg=ROSA_SUAVE)
+    frame_tabla.place(x=30, y=120, width=ancho_panel - 60, height=310)
+
+    columnas = (
+        "id",
+        "nombre",
+        "categoria",
+        "cantidad",
+        "precio_unitario",
+        "stock_minimo",
+        "proveedor",
+        "descripcion",
+    )
     tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings")
     tabla.heading("id", text="ID")
     tabla.heading("nombre", text="Nombre")
+    tabla.heading("categoria", text="Categoría")
     tabla.heading("cantidad", text="Cantidad")
-    tabla.heading("precio", text="Precio")
+    tabla.heading("precio_unitario", text="Precio Unitario")
+    tabla.heading("stock_minimo", text="Stock Mínimo")
+    tabla.heading("proveedor", text="Proveedor")
     tabla.heading("descripcion", text="Descripción")
 
     tabla.column("id", width=60, anchor="center")
     tabla.column("nombre", width=200, anchor="w")
-    tabla.column("cantidad", width=100, anchor="center")
-    tabla.column("precio", width=100, anchor="center")
-    tabla.column("descripcion", width=260, anchor="w")
+    tabla.column("categoria", width=140, anchor="w")
+    tabla.column("cantidad", width=90, anchor="center")
+    tabla.column("precio_unitario", width=120, anchor="center")
+    tabla.column("stock_minimo", width=110, anchor="center")
+    tabla.column("proveedor", width=140, anchor="w")
+    tabla.column("descripcion", width=200, anchor="w")
 
     scrollbar = ttk.Scrollbar(frame_tabla, orient="vertical", command=tabla.yview)
     tabla.configure(yscrollcommand=scrollbar.set)
@@ -316,20 +441,69 @@ def mostrar_inventario():
     tabla.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    try:
-        productos = obtener_productos()
-    except Exception as exc:
-        messagebox.showerror("Error", str(exc))
-        return
+    def ejecutar_busqueda():
+        for item in tabla.get_children():
+            tabla.delete(item)
 
-    for producto in productos:
-        tabla.insert("", "end", values=producto)
+        try:
+            todos = obtener_productos()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            return
+
+        texto_busqueda = entry_buscar.get().lower()
+        solo_bajo = var_stock_bajo.get()
+        criterio_orden = combo_orden.get()
+
+        lista_filtrada = []
+
+
+        for prod in todos:
+            nombre_prod = str(prod[1]).lower()
+            categoria_prod = str(prod[2])
+            cantidad_prod = int(prod[3])
+            precio_prod = float(prod[4])
+
+            if texto_busqueda and texto_busqueda not in nombre_prod:
+                continue
+
+            if solo_bajo and cantidad_prod > 5:
+                continue
+            lista_filtrada.append(prod)
+
+        if criterio_orden == "Nombre (A - Z)":
+            lista_filtrada.sort(key=lambda x: x[1].lower())
+
+        elif criterio_orden == "Nombre (Z - A)":
+            lista_filtrada.sort(key=lambda x: x[1].lower(), reverse=True)
+
+        elif criterio_orden == "Precio (Mayor a Menor)":
+            lista_filtrada.sort(key=lambda x: x[3], reverse=True)
+
+        elif criterio_orden == "Precio (Menor a Mayor)":
+            lista_filtrada.sort(key=lambda x: x[3])
+
+        elif criterio_orden == "Cantidad (Mayor a Menor)":
+            lista_filtrada.sort(key=lambda x: x[2], reverse=True)
+
+        elif criterio_orden == "Cantidad (Menor a Mayor)":
+            lista_filtrada.sort(key=lambda x: x[2])
+
+
+        for prod in lista_filtrada:
+            tabla.insert("", "end", values=prod)
+    btn_buscar = tk.Button(frame_filtros, text="🔍", bg=MORADO, fg=TEXTO_CLARO,
+                           font=("Arial", 9, "bold"), command=ejecutar_busqueda)
+    btn_buscar.pack(side="right", padx=5)
+
+    entry_buscar.bind("<Return>", lambda e: ejecutar_busqueda())
+    combo_orden.bind("<<ComboboxSelected>>", lambda e: ejecutar_busqueda())
+    check_bajo.config(command=ejecutar_busqueda)
+
+    ejecutar_busqueda()
 
     _boton(panel, "Cerrar", ventana.destroy, x=30, y=410, w=180, h=35)
 
-    tk.Button(
-        panel, text="X",
-        bg=MORADO, fg=TEXTO_CLARO,
-        bd=0, font=("Arial", 10, "bold"),
-        command=ventana.destroy
-    ).place(x=ancho_panel - 55, y=20, width=35, height=28)
+    tk.Button(panel, text="X", bg=MORADO, fg=TEXTO_CLARO, bd=0,
+              font=("Arial", 10, "bold"), command=ventana.destroy
+              ).place(x=ancho_panel - 55, y=20, width=35, height=28)

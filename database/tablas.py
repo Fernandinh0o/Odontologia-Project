@@ -16,18 +16,22 @@ def crear_tablas_iniciales():
     CREATE TABLE IF NOT EXISTS Usuarios (
         id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre_usuario TEXT NOT NULL UNIQUE,
+        telefono TEXT,
         password_hash TEXT NOT NULL,
-        rol TEXT NOT NULL CHECK(rol IN ('Admin', 'Empleado'))
+        rol TEXT NOT NULL CHECK(rol IN ('Admin', 'Empleado','Secretaria','Odontologo','Usuario'))
     );
     """
 
     # 2. Tabla de Productos
     sql_tabla_productos = """
     CREATE TABLE IF NOT EXISTS Productos (
-        id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_producto INTEGER PRIMARY KEY,
         nombre TEXT NOT NULL,
+        categoria TEXT NOT NULL,
         cantidad INTEGER NOT NULL,
-        precio REAL NOT NULL,
+        precio_unitario REAL NOT NULL,
+        stock_minimo INTEGER NOT NULL,
+        proveedor TEXT NOT NULL,
         descripcion TEXT
     );
     """
