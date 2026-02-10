@@ -28,13 +28,13 @@ FONDO = "#FFFFFF"
 TEXTO_GRIS = "#5B5B5B"
 AZUL_CLARO = "#80D8FF"
 
-AZUL_HEADER = "#0A2E44"
-AZUL_SIDEBAR = "#0E4963"
-GRIS_CONTENIDO = "#EFF2F5"
-GRIS_PANEL = "#F8FAFB"
-NARANJA_ACCENTO = "#F7A11A"
-AZUL_BOTON = "#2EA3D8"
-TEXTO_OSCURO = "#1F2A33"
+MORADO_HEADER = "#5C2D91"
+MORADO_SIDEBAR = "#6A3BA0"
+LILA_CONTENIDO = "#F3ECF8"
+LILA_PANEL = "#FFFFFF"
+FUCSIA_ACCENTO = "#A40078"
+FUCSIA_BOTON = "#8F0066"
+TEXTO_OSCURO = "#3D2A57"
 
 
 CTK_DISPONIBLE = importlib.util.find_spec("customtkinter") is not None
@@ -107,8 +107,8 @@ def _boton(panel, text, command, x, y, w=180, h=35):
 # ================== MENÚ SECRETARIA ==================
 def _boton_sidebar_tk(parent, texto, comando, y, activo=False):
     color_texto = "#FFFFFF" if activo else "#D8EBF5"
-    color_fondo = NARANJA_ACCENTO if activo else AZUL_SIDEBAR
-    color_hover = "#D28A16" if activo else "#155A78"
+    color_fondo = FUCSIA_ACCENTO if activo else MORADO_SIDEBAR
+    color_hover = "#83005F" if activo else "#5A3186"
     tk.Button(
         parent,
         text=texto,
@@ -136,7 +136,7 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
     ventana = tk.Toplevel()
     ventana.title("Menú Secretaria")
     ventana.geometry(f"{ANCHO}x{ALTO}")
-    ventana.configure(bg=AZUL_HEADER)
+    ventana.configure(bg=MORADO_HEADER)
     ventana.resizable(False, False)
 
     if CTK_DISPONIBLE:
@@ -144,28 +144,28 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
 
         contenedor = ctk.CTkFrame(
             ventana,
-            fg_color=AZUL_HEADER,
+            fg_color=MORADO_HEADER,
             corner_radius=0,
         )
         contenedor.pack(fill="both", expand=True)
 
         cabecera = ctk.CTkFrame(
             contenedor,
-            fg_color=AZUL_HEADER,
+            fg_color=MORADO_HEADER,
             corner_radius=0,
             height=58,
         )
         cabecera.pack(fill="x", side="top")
         ctk.CTkLabel(
             cabecera,
-            text="☰  Webforms",
-            text_color=NARANJA_ACCENTO,
+            text="☰  Clínica Dental",
+            text_color=FUCSIA_ACCENTO,
             font=("Arial", 24, "bold"),
         ).pack(side="left", padx=18, pady=10)
 
         frame_principal = ctk.CTkFrame(
             contenedor,
-            fg_color=GRIS_CONTENIDO,
+            fg_color=LILA_CONTENIDO,
             corner_radius=0,
         )
         frame_principal.pack(fill="both", expand=True)
@@ -176,7 +176,7 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
 
         sidebar = ctk.CTkFrame(
             frame_principal,
-            fg_color=AZUL_SIDEBAR,
+            fg_color=MORADO_SIDEBAR,
             corner_radius=0,
             width=250,
         )
@@ -186,14 +186,14 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
         ctk.CTkLabel(
             sidebar,
             text="Secciones",
-            text_color="#BEE3F5",
+            text_color="#F1DBFF",
             font=("Arial", 16, "bold"),
         ).grid(row=0, column=0, padx=24, pady=(24, 10), sticky="w")
 
         ctk.CTkLabel(
             sidebar,
             text=f"Rol: {rol}",
-            text_color="#E8F4FA",
+            text_color="#F6EFFF",
             font=("Arial", 12),
         ).grid(row=1, column=0, padx=24, pady=(0, 20), sticky="w")
 
@@ -214,14 +214,14 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
                 height=40,
                 anchor="w",
                 font=("Arial", 12, "bold"),
-                fg_color=NARANJA_ACCENTO if seleccionado else "transparent",
+                fg_color=FUCSIA_ACCENTO if seleccionado else "transparent",
                 text_color="#FFFFFF" if seleccionado else "#D8EBF5",
-                hover_color="#D28A16" if seleccionado else "#155A78",
+                hover_color="#83005F" if seleccionado else "#5A3186",
             ).grid(row=fila, column=0, padx=24, pady=8, sticky="ew")
 
         area_contenido = ctk.CTkFrame(
             frame_principal,
-            fg_color=GRIS_CONTENIDO,
+            fg_color=LILA_CONTENIDO,
             corner_radius=0,
         )
         area_contenido.grid(row=0, column=1, sticky="nsew", padx=24, pady=20)
@@ -236,15 +236,15 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
         ctk.CTkLabel(
             area_contenido,
             text="Selecciona una opción del menú lateral para abrir cada módulo.",
-            text_color="#5E6A72",
+            text_color="#6F558F",
             font=("Arial", 13),
         ).pack(anchor="nw")
 
         tarjetas = ctk.CTkFrame(
             area_contenido,
-            fg_color=GRIS_PANEL,
+            fg_color=LILA_PANEL,
             corner_radius=10,
-            border_color="#D4DCE2",
+            border_color="#DCCAE8",
             border_width=1,
             height=280,
         )
@@ -267,8 +267,8 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
                 tarjetas,
                 text=texto,
                 command=comando,
-                fg_color=AZUL_BOTON,
-                hover_color="#1C8ABD",
+                fg_color=FUCSIA_BOTON,
+                hover_color="#790055",
                 corner_radius=8,
                 height=34,
                 font=("Arial", 12, "bold"),
@@ -276,25 +276,25 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
             ).pack(anchor="nw", padx=20, pady=6)
 
     else:
-        cabecera = tk.Frame(ventana, bg=AZUL_HEADER, height=58)
+        cabecera = tk.Frame(ventana, bg=MORADO_HEADER, height=58)
         cabecera.pack(fill="x", side="top")
         tk.Label(
             cabecera,
-            text="☰  Webforms",
-            bg=AZUL_HEADER,
-            fg=NARANJA_ACCENTO,
+            text="☰  Clínica Dental",
+            bg=MORADO_HEADER,
+            fg=FUCSIA_ACCENTO,
             font=("Arial", 22, "bold"),
         ).pack(side="left", padx=15, pady=8)
 
-        cuerpo = tk.Frame(ventana, bg=GRIS_CONTENIDO)
+        cuerpo = tk.Frame(ventana, bg=LILA_CONTENIDO)
         cuerpo.pack(fill="both", expand=True)
 
-        sidebar = tk.Frame(cuerpo, bg=AZUL_SIDEBAR)
+        sidebar = tk.Frame(cuerpo, bg=MORADO_SIDEBAR)
         sidebar.place(x=0, y=0, width=260, height=ALTO - 58)
 
-        tk.Label(sidebar, text="Secciones", bg=AZUL_SIDEBAR, fg="#BEE3F5",
+        tk.Label(sidebar, text="Secciones", bg=MORADO_SIDEBAR, fg="#F1DBFF",
                  font=("Arial", 16, "bold")).place(x=16, y=20)
-        tk.Label(sidebar, text=f"Rol: {rol}", bg=AZUL_SIDEBAR, fg="#E8F4FA",
+        tk.Label(sidebar, text=f"Rol: {rol}", bg=MORADO_SIDEBAR, fg="#F6EFFF",
                  font=("Arial", 11)).place(x=16, y=52)
 
         _boton_sidebar_tk(sidebar, "🗂  Gestor de Usuarios", gestor_usuarios, y=95)
@@ -303,29 +303,29 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
         _boton_sidebar_tk(sidebar, "💳  Módulo de Ventas", mostrar_modulo_ventas, y=245, activo=True)
         _boton_sidebar_tk(sidebar, "↩  Cerrar Sesión", cerrar_sesion, y=295)
 
-        contenido = tk.Frame(cuerpo, bg=GRIS_CONTENIDO)
+        contenido = tk.Frame(cuerpo, bg=LILA_CONTENIDO)
         contenido.place(x=260, y=0, width=ANCHO - 260, height=ALTO - 58)
         tk.Label(
             contenido,
             text="Panel principal - Secretaría",
-            bg=GRIS_CONTENIDO,
+            bg=LILA_CONTENIDO,
             fg=TEXTO_OSCURO,
             font=("Arial", 24, "bold"),
         ).place(x=24, y=20)
         tk.Label(
             contenido,
             text="Selecciona una opción del menú lateral para abrir cada módulo.",
-            bg=GRIS_CONTENIDO,
-            fg="#5E6A72",
+            bg=LILA_CONTENIDO,
+            fg="#6F558F",
             font=("Arial", 12),
         ).place(x=24, y=62)
 
-        tarjeta = tk.Frame(contenido, bg=GRIS_PANEL, highlightbackground="#D4DCE2", highlightthickness=1)
+        tarjeta = tk.Frame(contenido, bg=LILA_PANEL, highlightbackground="#DCCAE8", highlightthickness=1)
         tarjeta.place(x=24, y=100, width=ANCHO - 310, height=260)
         tk.Label(
             tarjeta,
             text="Accesos rápidos",
-            bg=GRIS_PANEL,
+            bg=LILA_PANEL,
             fg=TEXTO_OSCURO,
             font=("Arial", 15, "bold"),
         ).place(x=16, y=16)
@@ -340,8 +340,8 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
                 tarjeta,
                 text=texto,
                 command=comando,
-                bg=AZUL_BOTON,
-                activebackground="#1C8ABD",
+                bg=FUCSIA_BOTON,
+                activebackground="#790055",
                 fg="#FFFFFF",
                 activeforeground="#FFFFFF",
                 bd=0,
