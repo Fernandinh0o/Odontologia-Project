@@ -28,6 +28,14 @@ FONDO = "#FFFFFF"
 TEXTO_GRIS = "#5B5B5B"
 AZUL_CLARO = "#80D8FF"
 
+AZUL_HEADER = "#0A2E44"
+AZUL_SIDEBAR = "#0E4963"
+GRIS_CONTENIDO = "#EFF2F5"
+GRIS_PANEL = "#F8FAFB"
+NARANJA_ACCENTO = "#F7A11A"
+AZUL_BOTON = "#2EA3D8"
+TEXTO_OSCURO = "#1F2A33"
+
 
 CTK_DISPONIBLE = importlib.util.find_spec("customtkinter") is not None
 ctk = importlib.import_module("customtkinter") if CTK_DISPONIBLE else None
@@ -97,6 +105,26 @@ def _boton(panel, text, command, x, y, w=180, h=35):
 
 
 # ================== MENÚ SECRETARIA ==================
+def _boton_sidebar_tk(parent, texto, comando, y, activo=False):
+    color_texto = "#FFFFFF" if activo else "#D8EBF5"
+    color_fondo = NARANJA_ACCENTO if activo else AZUL_SIDEBAR
+    color_hover = "#D28A16" if activo else "#155A78"
+    tk.Button(
+        parent,
+        text=texto,
+        command=comando,
+        bg=color_fondo,
+        activebackground=color_hover,
+        fg=color_texto,
+        activeforeground="#FFFFFF",
+        bd=0,
+        anchor="w",
+        padx=14,
+        font=("Arial", 10, "bold"),
+        cursor="hand2",
+    ).place(x=15, y=y, width=230, height=40)
+
+
 def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
     if rol not in {"Secretaria", "Empleado"}:
         messagebox.showerror(
@@ -108,51 +136,73 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
     ventana = tk.Toplevel()
     ventana.title("Menú Secretaria")
     ventana.geometry(f"{ANCHO}x{ALTO}")
-    ventana.configure(bg=AZUL_CLARO)
+    ventana.configure(bg=AZUL_HEADER)
     ventana.resizable(False, False)
 
     if CTK_DISPONIBLE:
         ctk.set_appearance_mode("light")
 
-        frame_principal = ctk.CTkFrame(
+        contenedor = ctk.CTkFrame(
             ventana,
-            fg_color=AZUL_CLARO,
+            fg_color=AZUL_HEADER,
+            corner_radius=0,
+        )
+        contenedor.pack(fill="both", expand=True)
+
+        cabecera = ctk.CTkFrame(
+            contenedor,
+            fg_color=AZUL_HEADER,
+            corner_radius=0,
+            height=58,
+        )
+        cabecera.pack(fill="x", side="top")
+        ctk.CTkLabel(
+            cabecera,
+            text="☰  Webforms",
+            text_color=NARANJA_ACCENTO,
+            font=("Arial", 24, "bold"),
+        ).pack(side="left", padx=18, pady=10)
+
+        frame_principal = ctk.CTkFrame(
+            contenedor,
+            fg_color=GRIS_CONTENIDO,
             corner_radius=0,
         )
         frame_principal.pack(fill="both", expand=True)
 
         frame_principal.grid_rowconfigure(0, weight=1)
-        frame_principal.grid_columnconfigure(0, weight=1)
-        frame_principal.grid_columnconfigure(1, weight=2)
+        frame_principal.grid_columnconfigure(0, weight=0)
+        frame_principal.grid_columnconfigure(1, weight=1)
 
         sidebar = ctk.CTkFrame(
             frame_principal,
-            fg_color="#FFFFFF",
-            corner_radius=20,
+            fg_color=AZUL_SIDEBAR,
+            corner_radius=0,
+            width=250,
         )
-        sidebar.grid(row=0, column=0, padx=(40, 20), pady=40, sticky="nsew")
+        sidebar.grid(row=0, column=0, sticky="ns")
         sidebar.grid_columnconfigure(0, weight=1)
 
         ctk.CTkLabel(
             sidebar,
-            text="Menú Secretaria",
-            text_color="#4A4A4A",
-            font=("Arial", 26, "bold"),
-        ).grid(row=0, column=0, padx=24, pady=(26, 8), sticky="w")
+            text="Secciones",
+            text_color="#BEE3F5",
+            font=("Arial", 16, "bold"),
+        ).grid(row=0, column=0, padx=24, pady=(24, 10), sticky="w")
 
         ctk.CTkLabel(
             sidebar,
             text=f"Rol: {rol}",
-            text_color="gray",
-            font=("Arial", 14),
-        ).grid(row=1, column=0, padx=24, pady=(0, 16), sticky="w")
+            text_color="#E8F4FA",
+            font=("Arial", 12),
+        ).grid(row=1, column=0, padx=24, pady=(0, 20), sticky="w")
 
         botones = [
-            ("Gestor de Usuarios", gestor_usuarios, False),
-            ("Inventario (Agregar)", gestor_inventario, False),
-            ("Ver Inventario", mostrar_inventario, False),
-            ("Módulo de Ventas", mostrar_modulo_ventas, True),
-            ("Cerrar Sesión", cerrar_sesion, False),
+            ("🗂  Gestor de Usuarios", gestor_usuarios, False),
+            ("📦  Inventario (Agregar)", gestor_inventario, False),
+            ("📋  Ver Inventario", mostrar_inventario, False),
+            ("💳  Módulo de Ventas", mostrar_modulo_ventas, True),
+            ("↩  Cerrar Sesión", cerrar_sesion, False),
         ]
 
         for fila, (texto, comando, seleccionado) in enumerate(botones, start=2):
@@ -160,33 +210,144 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
                 sidebar,
                 text=texto,
                 command=comando,
-                corner_radius=10,
-                height=42,
+                corner_radius=8,
+                height=40,
                 anchor="w",
-                font=("Arial", 13, "bold"),
-                fg_color="#00AEEF" if seleccionado else "transparent",
-                text_color="white" if seleccionado else "gray",
-                hover_color="#E0E0E0" if not seleccionado else "#0096D1",
+                font=("Arial", 12, "bold"),
+                fg_color=NARANJA_ACCENTO if seleccionado else "transparent",
+                text_color="#FFFFFF" if seleccionado else "#D8EBF5",
+                hover_color="#D28A16" if seleccionado else "#155A78",
             ).grid(row=fila, column=0, padx=24, pady=8, sticky="ew")
 
+        area_contenido = ctk.CTkFrame(
+            frame_principal,
+            fg_color=GRIS_CONTENIDO,
+            corner_radius=0,
+        )
+        area_contenido.grid(row=0, column=1, sticky="nsew", padx=24, pady=20)
+
+        ctk.CTkLabel(
+            area_contenido,
+            text="Panel principal - Secretaría",
+            text_color=TEXTO_OSCURO,
+            font=("Arial", 24, "bold"),
+        ).pack(anchor="nw", pady=(4, 8))
+
+        ctk.CTkLabel(
+            area_contenido,
+            text="Selecciona una opción del menú lateral para abrir cada módulo.",
+            text_color="#5E6A72",
+            font=("Arial", 13),
+        ).pack(anchor="nw")
+
+        tarjetas = ctk.CTkFrame(
+            area_contenido,
+            fg_color=GRIS_PANEL,
+            corner_radius=10,
+            border_color="#D4DCE2",
+            border_width=1,
+            height=280,
+        )
+        tarjetas.pack(fill="x", pady=(22, 0))
+        tarjetas.pack_propagate(False)
+
+        ctk.CTkLabel(
+            tarjetas,
+            text="Accesos rápidos",
+            text_color=TEXTO_OSCURO,
+            font=("Arial", 16, "bold"),
+        ).pack(anchor="nw", padx=20, pady=(16, 8))
+
+        for texto, comando in [
+            ("Abrir gestor de usuarios", gestor_usuarios),
+            ("Agregar producto al inventario", gestor_inventario),
+            ("Ver inventario completo", mostrar_inventario),
+        ]:
+            ctk.CTkButton(
+                tarjetas,
+                text=texto,
+                command=comando,
+                fg_color=AZUL_BOTON,
+                hover_color="#1C8ABD",
+                corner_radius=8,
+                height=34,
+                font=("Arial", 12, "bold"),
+                width=280,
+            ).pack(anchor="nw", padx=20, pady=6)
+
     else:
-        panel, ancho_panel, _ = _crear_panel(ventana, "Menú Secretaria")
+        cabecera = tk.Frame(ventana, bg=AZUL_HEADER, height=58)
+        cabecera.pack(fill="x", side="top")
+        tk.Label(
+            cabecera,
+            text="☰  Webforms",
+            bg=AZUL_HEADER,
+            fg=NARANJA_ACCENTO,
+            font=("Arial", 22, "bold"),
+        ).pack(side="left", padx=15, pady=8)
 
-        tk.Label(panel, text=f"Rol: {rol}", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-                 font=("Arial", 11)).place(x=25, y=55)
+        cuerpo = tk.Frame(ventana, bg=GRIS_CONTENIDO)
+        cuerpo.pack(fill="both", expand=True)
 
-        _boton(panel, "Gestor de Usuarios", gestor_usuarios, x=60, y=120, w=260)
-        _boton(panel, "Inventario (Agregar)", gestor_inventario, x=60, y=170, w=260)
-        _boton(panel, "Ver Inventario", mostrar_inventario, x=60, y=220, w=260)
-        _boton(panel, "Módulo de Ventas", mostrar_modulo_ventas, x=60, y=270, w=260)
-        _boton(panel, "Cerrar Sesión", cerrar_sesion, x=60, y=320, w=260)
+        sidebar = tk.Frame(cuerpo, bg=AZUL_SIDEBAR)
+        sidebar.place(x=0, y=0, width=260, height=ALTO - 58)
 
-        tk.Button(
-            panel, text="X",
-            bg=MORADO, fg=TEXTO_CLARO,
-            bd=0, font=("Arial", 10, "bold"),
-            command=cerrar_sesion
-        ).place(x=ancho_panel - 55, y=20, width=35, height=28)
+        tk.Label(sidebar, text="Secciones", bg=AZUL_SIDEBAR, fg="#BEE3F5",
+                 font=("Arial", 16, "bold")).place(x=16, y=20)
+        tk.Label(sidebar, text=f"Rol: {rol}", bg=AZUL_SIDEBAR, fg="#E8F4FA",
+                 font=("Arial", 11)).place(x=16, y=52)
+
+        _boton_sidebar_tk(sidebar, "🗂  Gestor de Usuarios", gestor_usuarios, y=95)
+        _boton_sidebar_tk(sidebar, "📦  Inventario (Agregar)", gestor_inventario, y=145)
+        _boton_sidebar_tk(sidebar, "📋  Ver Inventario", mostrar_inventario, y=195)
+        _boton_sidebar_tk(sidebar, "💳  Módulo de Ventas", mostrar_modulo_ventas, y=245, activo=True)
+        _boton_sidebar_tk(sidebar, "↩  Cerrar Sesión", cerrar_sesion, y=295)
+
+        contenido = tk.Frame(cuerpo, bg=GRIS_CONTENIDO)
+        contenido.place(x=260, y=0, width=ANCHO - 260, height=ALTO - 58)
+        tk.Label(
+            contenido,
+            text="Panel principal - Secretaría",
+            bg=GRIS_CONTENIDO,
+            fg=TEXTO_OSCURO,
+            font=("Arial", 24, "bold"),
+        ).place(x=24, y=20)
+        tk.Label(
+            contenido,
+            text="Selecciona una opción del menú lateral para abrir cada módulo.",
+            bg=GRIS_CONTENIDO,
+            fg="#5E6A72",
+            font=("Arial", 12),
+        ).place(x=24, y=62)
+
+        tarjeta = tk.Frame(contenido, bg=GRIS_PANEL, highlightbackground="#D4DCE2", highlightthickness=1)
+        tarjeta.place(x=24, y=100, width=ANCHO - 310, height=260)
+        tk.Label(
+            tarjeta,
+            text="Accesos rápidos",
+            bg=GRIS_PANEL,
+            fg=TEXTO_OSCURO,
+            font=("Arial", 15, "bold"),
+        ).place(x=16, y=16)
+
+        botones = [
+            ("Abrir gestor de usuarios", gestor_usuarios),
+            ("Agregar producto al inventario", gestor_inventario),
+            ("Ver inventario completo", mostrar_inventario),
+        ]
+        for i, (texto, comando) in enumerate(botones):
+            tk.Button(
+                tarjeta,
+                text=texto,
+                command=comando,
+                bg=AZUL_BOTON,
+                activebackground="#1C8ABD",
+                fg="#FFFFFF",
+                activeforeground="#FFFFFF",
+                bd=0,
+                font=("Arial", 11, "bold"),
+                cursor="hand2",
+            ).place(x=16, y=56 + (i * 46), width=280, height=32)
 
     ventana.protocol("WM_DELETE_WINDOW", cerrar_sesion)
 
