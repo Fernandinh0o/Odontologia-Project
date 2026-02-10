@@ -8,19 +8,19 @@ from interfaz.menu_admin import mostrar_menu_admin
 from interfaz.menu_secretaria import mostrar_menu_secretaria
 from interfaz.usuarios_controlador import autenticar
 
-BG = "#FFFFFF"
+BG = "#F8F6FB"
 CARD_BG = "#FFFFFF"
-CARD_BORDER = "#E9E9EF"
+CARD_BORDER = "#E5DDF3"
 
-TITLE_COLOR = "#2F2F3A"
-SUBTLE = "#8B8BA0"
+TITLE_COLOR = "#5E2D91"
+SUBTLE = "#7B3FB3"
 
-INPUT_BG = "#EFEFF3"
-INPUT_FG = "#22222A"
+INPUT_BG = "#F2ECFA"
+INPUT_FG = "#3B215A"
 INPUT_PLACEHOLDER = "#9A9AAA"
 
-BTN_BG = "#6C63FF"
-BTN_BG_HOVER = "#5A52E6"
+BTN_BG = "#C21875"
+BTN_BG_HOVER = "#A31563"
 BTN_FG = "#FFFFFF"
 
 LINK = "#6C63FF"
