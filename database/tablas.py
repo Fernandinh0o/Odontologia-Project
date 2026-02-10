@@ -36,6 +36,57 @@ def crear_tablas_iniciales():
     );
     """
 
+    sql_tabla_pacientes = """
+        CREATE TABLE IF NOT EXISTS Pacientes (
+            id_paciente INTEGER PRIMARY KEY,
+            nombre TEXT NOT NULL,
+            telefono TEXT,
+            nit TEXT,
+            tiene_seguro BOOLEAN DEFAULT 0,
+            aseguradora TEXT
+        );
+        """
+
+    sql_tabla_tratamientos = """
+        CREATE TABLE IF NOT EXISTS Tratamientos (
+            id_tratamiento INTEGER PRIMARY KEY,
+            nombre TEXT NOT NULL,
+            precio_base REAL NOT NULL
+        );
+        """
+
+    sql_tabla_presupuestos = """
+        CREATE TABLE IF NOT EXISTS Presupuestos (
+            id_presupuesto INTEGER PRIMARY KEY,
+            id_paciente INTEGER NOT NULL,
+            fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+            total REAL DEFAULT 0,
+            FOREIGN KEY(id_paciente) REFERENCES Pacientes(id_paciente)
+        );
+        """
+
+    sql_tabla_detalle_presupuesto = """
+        CREATE TABLE IF NOT EXISTS Detalle_Presupuesto (
+            id_detalle INTEGER PRIMARY KEY,
+            id_presupuesto INTEGER NOT NULL,
+            id_tratamiento INTEGER NOT NULL,
+            pieza_dental TEXT,
+            precio_final REAL NOT NULL,
+            notas TEXT,
+            FOREIGN KEY(id_presupuesto) REFERENCES Presupuestos(id_presupuesto),
+            FOREIGN KEY(id_tratamiento) REFERENCES Tratamientos(id_tratamiento)
+        );
+        """
+
+    sql_tabla_pagos_gastos = """
+        CREATE TABLE IF NOT EXISTS Pagos_Gastos (
+            id_gasto INTEGER PRIMARY KEY,
+            tipo TEXT NOT NULL,
+            monto REAL NOT NULL,
+            fecha DATE DEFAULT (DATE('now')),
+            descripcion TEXT
+        );
+        """
     # Ejecución de Comandos
     conn = crear_conexion()
 
@@ -47,6 +98,11 @@ def crear_tablas_iniciales():
             print("Creando/Verificando tablas...")
             cursor.execute(sql_tabla_usuarios)
             cursor.execute(sql_tabla_productos)
+            cursor.execute(sql_tabla_pacientes)
+            cursor.execute(sql_tabla_tratamientos)
+            cursor.execute(sql_tabla_presupuestos)
+            cursor.execute(sql_tabla_detalle_presupuesto)
+            cursor.execute(sql_tabla_pagos_gastos)
 
             conn.commit()
             print("Tablas listas.")
