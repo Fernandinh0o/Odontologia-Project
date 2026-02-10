@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
+import importlib
+import importlib.util
 
 from gestores.gestor_inventario import (
     actualizar_producto,
@@ -24,6 +26,11 @@ TEXTO_CLARO = "#FFFFFF"
 MORADO = "#4B2A6A"
 FONDO = "#FFFFFF"
 TEXTO_GRIS = "#5B5B5B"
+AZUL_CLARO = "#80D8FF"
+
+
+CTK_DISPONIBLE = importlib.util.find_spec("customtkinter") is not None
+ctk = importlib.import_module("customtkinter") if CTK_DISPONIBLE else None
 
 
 def rounded_rect(canvas, x1, y1, x2, y2, r=25, **kwargs):
@@ -101,28 +108,85 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
     ventana = tk.Toplevel()
     ventana.title("Menú Secretaria")
     ventana.geometry(f"{ANCHO}x{ALTO}")
-    ventana.configure(bg=FONDO)
+    ventana.configure(bg=AZUL_CLARO)
     ventana.resizable(False, False)
 
-    panel, ancho_panel, _ = _crear_panel(ventana, "Menú Secretaria")
+    if CTK_DISPONIBLE:
+        ctk.set_appearance_mode("light")
 
-    tk.Label(panel, text=f"Rol: {rol}", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 11)).place(x=25, y=55)
+        frame_principal = ctk.CTkFrame(
+            ventana,
+            fg_color=AZUL_CLARO,
+            corner_radius=0,
+        )
+        frame_principal.pack(fill="both", expand=True)
 
-    _boton(panel, "Gestor de Usuarios", gestor_usuarios, x=60, y=120, w=260)
-    _boton(panel, "Inventario (Agregar)", gestor_inventario, x=60, y=170, w=260)
-    _boton(panel, "Ver Inventario", mostrar_inventario, x=60, y=220, w=260)
-    _boton(panel, "Módulo de Ventas", mostrar_modulo_ventas, x=60, y=270, w=260)
+        frame_principal.grid_rowconfigure(0, weight=1)
+        frame_principal.grid_columnconfigure(0, weight=1)
+        frame_principal.grid_columnconfigure(1, weight=2)
 
-    _boton(panel, "Cerrar Sesión", cerrar_sesion, x=60, y=320, w=260)
+        sidebar = ctk.CTkFrame(
+            frame_principal,
+            fg_color="#FFFFFF",
+            corner_radius=20,
+        )
+        sidebar.grid(row=0, column=0, padx=(40, 20), pady=40, sticky="nsew")
+        sidebar.grid_columnconfigure(0, weight=1)
 
+        ctk.CTkLabel(
+            sidebar,
+            text="Menú Secretaria",
+            text_color="#4A4A4A",
+            font=("Arial", 26, "bold"),
+        ).grid(row=0, column=0, padx=24, pady=(26, 8), sticky="w")
 
-    tk.Button(
-        panel, text="X",
-        bg=MORADO, fg=TEXTO_CLARO,
-        bd=0, font=("Arial", 10, "bold"),
-        command=cerrar_sesion
-    ).place(x=ancho_panel - 55, y=20, width=35, height=28)
+        ctk.CTkLabel(
+            sidebar,
+            text=f"Rol: {rol}",
+            text_color="gray",
+            font=("Arial", 14),
+        ).grid(row=1, column=0, padx=24, pady=(0, 16), sticky="w")
+
+        botones = [
+            ("Gestor de Usuarios", gestor_usuarios, False),
+            ("Inventario (Agregar)", gestor_inventario, False),
+            ("Ver Inventario", mostrar_inventario, False),
+            ("Módulo de Ventas", mostrar_modulo_ventas, True),
+            ("Cerrar Sesión", cerrar_sesion, False),
+        ]
+
+        for fila, (texto, comando, seleccionado) in enumerate(botones, start=2):
+            ctk.CTkButton(
+                sidebar,
+                text=texto,
+                command=comando,
+                corner_radius=10,
+                height=42,
+                anchor="w",
+                font=("Arial", 13, "bold"),
+                fg_color="#00AEEF" if seleccionado else "transparent",
+                text_color="white" if seleccionado else "gray",
+                hover_color="#E0E0E0" if not seleccionado else "#0096D1",
+            ).grid(row=fila, column=0, padx=24, pady=8, sticky="ew")
+
+    else:
+        panel, ancho_panel, _ = _crear_panel(ventana, "Menú Secretaria")
+
+        tk.Label(panel, text=f"Rol: {rol}", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
+                 font=("Arial", 11)).place(x=25, y=55)
+
+        _boton(panel, "Gestor de Usuarios", gestor_usuarios, x=60, y=120, w=260)
+        _boton(panel, "Inventario (Agregar)", gestor_inventario, x=60, y=170, w=260)
+        _boton(panel, "Ver Inventario", mostrar_inventario, x=60, y=220, w=260)
+        _boton(panel, "Módulo de Ventas", mostrar_modulo_ventas, x=60, y=270, w=260)
+        _boton(panel, "Cerrar Sesión", cerrar_sesion, x=60, y=320, w=260)
+
+        tk.Button(
+            panel, text="X",
+            bg=MORADO, fg=TEXTO_CLARO,
+            bd=0, font=("Arial", 10, "bold"),
+            command=cerrar_sesion
+        ).place(x=ancho_panel - 55, y=20, width=35, height=28)
 
     ventana.protocol("WM_DELETE_WINDOW", cerrar_sesion)
 
