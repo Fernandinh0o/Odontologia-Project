@@ -12,6 +12,7 @@ from interfaz.usuarios_controlador import (
     registrar_usuario,
 )
 from modelos.producto import Producto
+from interfaz.modulo_ventas import mostrar_modulo_ventas
 
 
 
@@ -111,8 +112,9 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
     _boton(panel, "Gestor de Usuarios", gestor_usuarios, x=60, y=120, w=260)
     _boton(panel, "Inventario (Agregar)", gestor_inventario, x=60, y=170, w=260)
     _boton(panel, "Ver Inventario", mostrar_inventario, x=60, y=220, w=260)
+    _boton(panel, "Módulo de Ventas", mostrar_modulo_ventas, x=60, y=270, w=260)
 
-    _boton(panel, "Cerrar Sesión", cerrar_sesion, x=60, y=300, w=260)
+    _boton(panel, "Cerrar Sesión", cerrar_sesion, x=60, y=320, w=260)
 
 
     tk.Button(
