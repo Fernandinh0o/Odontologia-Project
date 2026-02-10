@@ -1,51 +1,136 @@
 import tkinter as tk
 from tkinter import messagebox
 import os
+import json
+from PIL import Image, ImageTk  # ✅ para redimensionar bien
 
 from interfaz.menu_admin import mostrar_menu_admin
 from interfaz.menu_secretaria import mostrar_menu_secretaria
 from interfaz.usuarios_controlador import autenticar
 
+BG = "#FFFFFF"
+CARD_BG = "#FFFFFF"
+CARD_BORDER = "#E9E9EF"
+
+TITLE_COLOR = "#2F2F3A"
+SUBTLE = "#8B8BA0"
+
+INPUT_BG = "#EFEFF3"
+INPUT_FG = "#22222A"
+INPUT_PLACEHOLDER = "#9A9AAA"
+
+BTN_BG = "#6C63FF"
+BTN_BG_HOVER = "#5A52E6"
+BTN_FG = "#FFFFFF"
+
+LINK = "#6C63FF"
+ERROR = "#C0392B"
+
+REMEMBER_FILE = "remember_me.json"
 
 
-ancho = 900
-alto = 520
+def _get_logo_path():
+    # Tu logo está en: interfaz/logo.png (según tu proyecto)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    p1 = os.path.join(base_dir, "logo.png")
+    if os.path.exists(p1):
+        return p1
 
-rosa_suave = "#E8D4E0"   # Rosa frame
-texto_claro = "#FFFFFF" # Texto para botones oscuros
-morado = "#4B2A6A"      # Morado (botones)
-fondo = "#FFFFFF"       # Fondo general
-texto_gris = "#5B5B5B"
+    # fallback opcional (si algún día lo mueves a raíz/img/)
+    p2 = os.path.join(base_dir, "..", "img", "logo_clinica_dental.png")
+    if os.path.exists(p2):
+        return p2
 
-ruta_logo = "img/logo_clinica_dental.png"
+    return None
 
 
-def rounded_rect(canvas, x1, y1, x2, y2, r=25, **kwargs):
-    points = [
-        x1 + r, y1,
-        x2 - r, y1,
-        x2, y1,
-        x2, y1 + r,
-        x2, y2 - r,
-        x2, y2,
-        x2 - r, y2,
-        x1 + r, y2,
-        x1, y2,
-        x1, y2 - r,
-        x1, y1 + r,
-        x1, y1
-    ]
-    return canvas.create_polygon(points, smooth=True, **kwargs)
+def _load_remembered_user():
+    try:
+        if os.path.exists(REMEMBER_FILE):
+            with open(REMEMBER_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data.get("username", "")
+    except Exception:
+        pass
+    return ""
 
+
+def _save_remembered_user(username: str, enabled: bool):
+    try:
+        if enabled:
+            with open(REMEMBER_FILE, "w", encoding="utf-8") as f:
+                json.dump({"username": username}, f, ensure_ascii=False, indent=2)
+        else:
+            if os.path.exists(REMEMBER_FILE):
+                os.remove(REMEMBER_FILE)
+    except Exception:
+        pass
+
+
+def _add_placeholder(entry: tk.Entry, placeholder: str, is_password=False):
+    def set_placeholder():
+        entry.delete(0, tk.END)
+        entry.insert(0, placeholder)
+        entry.config(fg=INPUT_PLACEHOLDER)
+        if is_password:
+            entry.config(show="")
+
+    def on_focus_in(_):
+        if entry.get() == placeholder and entry.cget("fg") == INPUT_PLACEHOLDER:
+            entry.delete(0, tk.END)
+            entry.config(fg=INPUT_FG)
+            if is_password:
+                entry.config(show="*")
+
+    def on_focus_out(_):
+        if not entry.get().strip():
+            set_placeholder()
+
+    entry.bind("<FocusIn>", on_focus_in)
+    entry.bind("<FocusOut>", on_focus_out)
+    set_placeholder()
+
+
+def _is_placeholder(entry: tk.Entry, placeholder: str):
+    return entry.get() == placeholder and entry.cget("fg") == INPUT_PLACEHOLDER
+
+
+def add_hover(btn: tk.Button, normal_bg: str, hover_bg: str):
+    btn.bind("<Enter>", lambda e: btn.config(bg=hover_bg))
+    btn.bind("<Leave>", lambda e: btn.config(bg=normal_bg))
+
+
+def fade_in(win: tk.Tk, step=0.05, delay=10):
+    try:
+        win.attributes("-alpha", 0.0)
+    except Exception:
+        return
+
+    def _up(a=0.0):
+        a = a + step
+        if a >= 1.0:
+            try:
+                win.attributes("-alpha", 1.0)
+            except Exception:
+                pass
+            return
+        try:
+            win.attributes("-alpha", a)
+        except Exception:
+            return
+        win.after(delay, _up, a)
+
+    _up()
 
 
 def login(root):
     ventana = root
-    ventana.title("Login - Clinica dental")
-    ventana.geometry(f"{ancho}x{alto}")
-    ventana.configure(bg=fondo)
-    ventana.resizable(False, False)
+    ventana.title("Login - Clínica Dental")
+    ventana.configure(bg=BG)
 
+    ventana.state("zoomed")   # Windows
+    ventana.minsize(600, 450)
+    ventana.resizable(True, True)
 
     for w in ventana.winfo_children():
         w.destroy()
@@ -55,118 +140,157 @@ def login(root):
 
     ventana.protocol("WM_DELETE_WINDOW", cerrar_app)
 
-    canvas = tk.Canvas(ventana, bg=fondo, highlightthickness=0)
-    canvas.pack(fill="both", expand=True)
+    container = tk.Frame(ventana, bg=BG)
+    container.pack(fill="both", expand=True)
 
-    ancho_panel = 660
-    alto_panel = 400
+    container.grid_rowconfigure(0, weight=1)
+    container.grid_rowconfigure(2, weight=1)
+    container.grid_columnconfigure(0, weight=1)
+    container.grid_columnconfigure(2, weight=1)
 
-    panel_x = (ancho - ancho_panel) // 2
-    panel_y = (alto - alto_panel) // 2
+    card = tk.Frame(container, bg=CARD_BG, highlightthickness=1, highlightbackground=CARD_BORDER)
+    card.grid(row=1, column=1, sticky="nsew")
+    card.pack_propagate(False)
 
-    rounded_rect(
-        canvas,
-        panel_x, panel_y,
-        panel_x + ancho_panel, panel_y + alto_panel,
-        r=28,
-        fill=rosa_suave,
-        outline=rosa_suave
+    def resize_card(event):
+        w = max(360, min(560, int(event.width * 0.45)))
+        h = max(320, min(420, int(event.height * 0.65)))
+        card.config(width=w, height=h)
+
+    container.bind("<Configure>", resize_card)
+
+    # ===== LOGO PEQUEÑO EN ESQUINA (NO ESTORBA) =====
+    logo_img = None
+    logo_path = _get_logo_path()
+
+    if logo_path:
+        try:
+            img = Image.open(logo_path)
+
+            # ✅ TAMAÑO MÁXIMO DEL LOGO (ajusta aquí si quieres)
+            img.thumbnail((120, 90))
+
+            logo_img = ImageTk.PhotoImage(img)
+
+            # Lo colocamos en la esquina superior izquierda del card
+            lbl_logo = tk.Label(card, image=logo_img, bg=CARD_BG)
+            lbl_logo.image = logo_img
+            lbl_logo.place(x=14, y=12)  # ✅ esquina
+
+        except Exception as e:
+            print("Error cargando logo:", e)
+
+    # ===== contenido del card =====
+    tk.Label(card, text="LOGIN", bg=CARD_BG, fg=TITLE_COLOR, font=("Arial", 18, "bold")).pack(
+        pady=(34, 18)  # deja espacio arriba por el logo en esquina
     )
 
-    panel = tk.Frame(ventana, bg=rosa_suave)
-    panel.place(x=panel_x, y=panel_y, width=ancho_panel, height=alto_panel)
+    body = tk.Frame(card, bg=CARD_BG)
+    body.pack(padx=50, fill="x")
 
+    entry_user = tk.Entry(body, bd=0, bg=INPUT_BG, fg=INPUT_FG, font=("Arial", 11))
+    entry_user.pack(fill="x", ipady=10)
+    _add_placeholder(entry_user, "Username")
 
-    if os.path.exists(ruta_logo):
-        logo_img = tk.PhotoImage(file=ruta_logo)
-        lbl_logo = tk.Label(panel, image=logo_img, bg=rosa_suave)
-        lbl_logo.image = logo_img
-        lbl_logo.place(x=(ancho_panel - logo_img.width()) // 2, y=20)
+    tk.Frame(body, height=14, bg=CARD_BG).pack()
 
-
-    tk.Button(
-        panel, text="X",
-        bg=morado, fg=texto_claro,
-        bd=0, font=("Arial", 10, "bold"),
-        command=cerrar_app
-    ).place(x=ancho_panel - 45, y=15, width=30, height=25)
-
-
-    tk.Label(panel, text="Usuario", bg=rosa_suave, fg=texto_gris).place(x=140, y=160)
-    entry_user = tk.Entry(panel, bd=0, font=("Arial", 12))
-    entry_user.place(x=140, y=180, width=380, height=22)
-    tk.Frame(panel, bg=texto_claro).place(x=140, y=205, width=380, height=2)
-
-    # Contraseña
-    tk.Label(panel, text="Contraseña", bg=rosa_suave, fg=texto_gris).place(x=140, y=220)
-    entry_pwd = tk.Entry(panel, bd=0, font=("Arial", 12), show="*")
-    entry_pwd.place(x=140, y=240, width=380, height=22)
-    tk.Frame(panel, bg=texto_claro).place(x=140, y=265, width=380, height=2)
-
-
-    lbl_error = tk.Label(panel, bg=rosa_suave, fg=texto_gris, font=("Arial", 9, "bold"))
-
-    # Ojito
-    mostrar = False
+    mostrar = {"on": False}
 
     def toggle_password():
-        nonlocal mostrar
-        mostrar = not mostrar
-        entry_pwd.config(show="" if mostrar else "*")
+        if _is_placeholder(entry_pwd, "Password"):
+            return
+        mostrar["on"] = not mostrar["on"]
+        entry_pwd.config(show="" if mostrar["on"] else "*")
+
+    pwd_wrap = tk.Frame(body, bg=CARD_BG)
+    pwd_wrap.pack(fill="x")
+
+    entry_pwd = tk.Entry(pwd_wrap, bd=0, bg=INPUT_BG, fg=INPUT_FG, font=("Arial", 11))
+    entry_pwd.pack(side="left", fill="x", expand=True, ipady=10)
 
     btn_eye = tk.Button(
-        panel, text="👁",
-        bg="white", fg=morado, bd=0,
-        font=("Arial", 12),
+        pwd_wrap, text="👁",
+        bg=INPUT_BG, fg=SUBTLE,
+        bd=0, cursor="hand2",
         command=toggle_password
     )
-    btn_eye.place(x=530, y=236, width=40, height=25)
+    btn_eye.pack(side="right", ipadx=10, ipady=6)
 
+    _add_placeholder(entry_pwd, "Password", is_password=True)
 
-    def recuperar():
-        messagebox.showinfo("Recuperar contraseña", "Contacta con administración")
+    row = tk.Frame(body, bg=CARD_BG)
+    row.pack(fill="x", pady=(12, 0))
 
-    tk.Button(
-        panel, text="Recuperar contraseña",
-        bg=morado, fg=texto_claro,
-        bd=0, font=("Arial", 8, "bold"),
-        command=recuperar
-    ).place(x=140, y=275, width=130, height=18)
+    remember_var = tk.BooleanVar(value=False)
+    tk.Checkbutton(
+        row, text="Remember me",
+        variable=remember_var,
+        bg=CARD_BG, fg=SUBTLE,
+        activebackground=CARD_BG,
+        activeforeground=SUBTLE,
+        bd=0, font=("Arial", 9),
+        cursor="hand2"
+    ).pack(side="left")
 
+    def recuperar(_=None):
+        messagebox.showinfo("Recuperar contraseña", "Contacta con administración.")
+
+    lbl_forgot = tk.Label(
+        row, text="Forgot?",
+        bg=CARD_BG, fg=LINK,
+        font=("Arial", 9, "underline"),
+        cursor="hand2"
+    )
+    lbl_forgot.pack(side="right")
+    lbl_forgot.bind("<Button-1>", recuperar)
+
+    lbl_error = tk.Label(body, text="", bg=CARD_BG, fg=ERROR, font=("Arial", 9, "bold"))
+    lbl_error.pack(pady=(10, 0))
 
     def ingresar():
-        usuario = entry_user.get().strip()
-        pwd = entry_pwd.get().strip()
+        usuario = "" if _is_placeholder(entry_user, "Username") else entry_user.get().strip()
+        pwd = "" if _is_placeholder(entry_pwd, "Password") else entry_pwd.get().strip()
 
         if not usuario or not pwd:
-            lbl_error.config(text="Complete todos los campos")
-            lbl_error.place(x=260, y=278)
+            lbl_error.config(text="Complete todos los campos.")
             return
 
         datos = autenticar(usuario, pwd)
-
         if datos:
-
             _, nombre, rol = datos
-            lbl_error.place_forget()
+            lbl_error.config(text="")
+            _save_remembered_user(usuario, remember_var.get())
 
             messagebox.showinfo("Acceso", f"Bienvenido {nombre}\nRol: {rol}")
             ventana.withdraw()
             menu_principal(ventana, rol)
         else:
-            lbl_error.config(text="Credenciales incorrectas")
-            lbl_error.place(x=285, y=278)
+            lbl_error.config(text="Credenciales incorrectas.")
 
-    tk.Button(
-        panel, text="Iniciar sesión",
-        bg=morado, fg=texto_claro,
+    btn_login = tk.Button(
+        card, text="LOGIN",
+        bg=BTN_BG, fg=BTN_FG,
         bd=0, font=("Arial", 10, "bold"),
+        cursor="hand2",
+        activebackground=BTN_BG_HOVER,
+        activeforeground=BTN_FG,
         command=ingresar
-    ).place(x=(ancho_panel - 120) // 2, y=320, width=120, height=25)
+    )
+    btn_login.pack(pady=(18, 0), ipadx=35, ipady=10)
+
+    add_hover(btn_login, BTN_BG, BTN_BG_HOVER)
+
+    remembered = _load_remembered_user()
+    if remembered:
+        remember_var.set(True)
+        entry_user.config(fg=INPUT_FG)
+        entry_user.delete(0, tk.END)
+        entry_user.insert(0, remembered)
 
     ventana.bind("<Return>", lambda e: ingresar())
-    entry_user.focus()
+    entry_user.focus_set()
 
+    fade_in(ventana, step=0.06, delay=10)
 
 
 def menu_principal(root, rol):
@@ -174,7 +298,6 @@ def menu_principal(root, rol):
         root.destroy()
 
     def cerrar_sesion():
-
         for widget in root.winfo_children():
             widget.destroy()
         root.deiconify()
@@ -188,19 +311,27 @@ def menu_principal(root, rol):
         mostrar_menu_admin(root, cerrar_app, cerrar_sesion)
         return
 
-    ventana = tk.Toplevel()
+    ventana = tk.Toplevel(root)
     ventana.title("Menú Principal")
     ventana.geometry("300x250")
+    ventana.configure(bg=BG)
+    ventana.resizable(False, False)
 
-    tk.Label(ventana, text=f"Rol: {rol}", font=("Arial", 12)).pack(pady=10)
+    tk.Label(ventana, text=f"Rol: {rol}", font=("Arial", 12, "bold"), bg=BG, fg=TITLE_COLOR).pack(pady=12)
 
     def ejecutar():
         messagebox.showinfo("Ejecutar", "Función en desarrollo")
 
-    tk.Button(ventana, text="▶ Ejecutar", command=ejecutar).pack(pady=5)
+    tk.Button(ventana, text="▶ Ejecutar", command=ejecutar).pack(pady=6)
+
+    if rol == "Usuario":
+        tk.Label(ventana, text="Acceso de usuario", bg=BG, fg=SUBTLE).pack(pady=6)
+        tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=6)
 
     ventana.protocol("WM_DELETE_WINDOW", cerrar_app)
 
-    if rol == "Usuario":
-        tk.Label(ventana, text="Acceso de usuario").pack(pady=5)
-        tk.Button(ventana, text="Salir", command=cerrar_app).pack(pady=5)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    login(root)
+    root.mainloop()
