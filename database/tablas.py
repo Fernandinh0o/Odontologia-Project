@@ -69,9 +69,7 @@ def crear_tablas_iniciales():
             id_paciente INTEGER PRIMARY KEY,
             nombre TEXT NOT NULL,
             telefono TEXT,
-            nit TEXT,
-            tiene_seguro BOOLEAN DEFAULT 0,
-            aseguradora TEXT
+            nit TEXT
         );
         """
 
@@ -89,6 +87,7 @@ def crear_tablas_iniciales():
             id_paciente INTEGER NOT NULL,
             fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
             total REAL DEFAULT 0,
+            estado TEXT DEFAULT 'Pendiente',
             FOREIGN KEY(id_paciente) REFERENCES Pacientes(id_paciente)
         );
         """
@@ -115,6 +114,34 @@ def crear_tablas_iniciales():
             descripcion TEXT
         );
         """
+
+    def insertar_datos_prueba(cursor):
+        cursor.execute("SELECT COUNT(*) FROM Tratamientos")
+        if cursor.fetchone()[0] == 0:
+            print("Insertando tratamientos base...")
+            tratamientos_base = [
+                (1, 'Consulta General', 150.00),
+                (2, 'Limpieza Dental', 250.00),
+                (3, 'Extracción Simple', 300.00),
+                (4, 'Extracción Cordal', 800.00),
+                (5, 'Blanqueamiento', 1500.00)
+            ]
+            cursor.executemany("""
+                INSERT INTO Tratamientos (id_tratamiento, nombre, precio_base) 
+                VALUES (?, ?, ?)
+            """, tratamientos_base)
+        cursor.execute("SELECT COUNT(*) FROM Pacientes")
+        if cursor.fetchone()[0] == 0:
+            print("Insertando pacientes de prueba...")
+            pacientes_base = [
+                (1, 'Juan Pérez', '5555-1234', '123456-7'),
+                (2, 'Maria Lopez ', '4444-5678', '987654-3'),
+                (3, 'Carlos Martinez', '1234-4321', 'CF')
+            ]
+            cursor.executemany("""
+                    INSERT INTO Pacientes (id_paciente, nombre, telefono, nit) 
+                    VALUES (?, ?, ?, ?)
+                """, pacientes_base)
     # Ejecución de Comandos
     conn = crear_conexion()
 
@@ -133,6 +160,8 @@ def crear_tablas_iniciales():
             cursor.execute(sql_tabla_presupuestos)
             cursor.execute(sql_tabla_detalle_presupuesto)
             cursor.execute(sql_tabla_pagos_gastos)
+
+            insertar_datos_prueba(cursor)
 
             conn.commit()
             print("Tablas listas.")

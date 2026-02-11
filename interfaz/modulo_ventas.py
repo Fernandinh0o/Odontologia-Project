@@ -1,11 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
+from datetime import datetime
 
-from gestores.gestor_ventas import (
-    obtener_productos_disponibles,
-    obtener_ventas,
-    registrar_venta,
-)
+# Importamos los gestores que SI tienes y el nuevo
+from gestores.gestor_pacientes import buscar_pacientes
+from gestores.gestor_tratamientos import obtener_tratamientos
+from gestores.gestor_presupuestos import crear_presupuesto_cabecera, agregar_detalle_presupuesto, \
+    obtener_presupuestos_recientes, cobrar_presupuesto
 
 ROSA_SUAVE = "#E8D4E0"
 TEXTO_CLARO = "#FFFFFF"
@@ -15,237 +16,209 @@ TEXTO_GRIS = "#5B5B5B"
 
 def _boton(panel, text, command, x, y, w=160, h=35):
     tk.Button(
-        panel,
-        text=text,
-        bg=MORADO,
-        fg=TEXTO_CLARO,
-        bd=0,
-        font=("Arial", 10, "bold"),
-        command=command,
+        panel, text=text, bg=MORADO, fg=TEXTO_CLARO, bd=0,
+        font=("Arial", 10, "bold"), command=command,
     ).place(x=x, y=y, width=w, height=h)
 
 
 def mostrar_modulo_ventas():
     ventana = tk.Toplevel()
-    ventana.title("Módulo de Ventas")
-    ventana.geometry("980x560")
+    ventana.title("Gestión de Tratamientos y Ventas")
+    ventana.geometry("1100x600")
     ventana.configure(bg=ROSA_SUAVE)
     ventana.resizable(False, False)
 
-    tk.Label(
-        ventana,
-        text="Facturación de Ventas",
-        bg=ROSA_SUAVE,
-        fg=MORADO,
-        font=("Arial", 16, "bold"),
-    ).place(x=30, y=20)
+    tk.Label(ventana, text="Presupuesto Clínico", bg=ROSA_SUAVE, fg=MORADO,
+             font=("Arial", 16, "bold")).place(x=30, y=20)
 
-    frame_form = tk.Frame(ventana, bg=ROSA_SUAVE)
-    frame_form.place(x=30, y=70, width=420, height=220)
+    frame_paciente = tk.LabelFrame(ventana, text="Paciente", bg=ROSA_SUAVE, fg=TEXTO_GRIS)
+    frame_paciente.place(x=30, y=60, width=500, height=80)
 
-    tk.Label(frame_form, text="Cliente", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 10, "bold")).grid(row=0, column=0, sticky="w", pady=8)
-    tk.Label(frame_form, text="Producto", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 10, "bold")).grid(row=1, column=0, sticky="w", pady=8)
-    tk.Label(frame_form, text="Cantidad", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 10, "bold")).grid(row=2, column=0, sticky="w", pady=8)
+    tk.Label(frame_paciente, text="Buscar:", bg=ROSA_SUAVE).place(x=10, y=20)
+    combo_pacientes = ttk.Combobox(frame_paciente, width=30)
+    combo_pacientes.place(x=70, y=20)
 
-    entry_cliente = tk.Entry(frame_form, font=("Arial", 11))
-    entry_cliente.grid(row=0, column=1, padx=10)
 
-    combo_producto = ttk.Combobox(frame_form, state="readonly", width=30)
-    combo_producto.grid(row=1, column=1, padx=10)
+    frame_trata = tk.Frame(ventana, bg=ROSA_SUAVE)
+    frame_trata.place(x=30, y=150, width=500, height=180)
 
-    entry_cantidad = tk.Entry(frame_form, font=("Arial", 11))
-    entry_cantidad.grid(row=2, column=1, padx=10)
+    tk.Label(frame_trata, text="Tratamiento", bg=ROSA_SUAVE, font=("Arial", 10, "bold")).grid(row=0, column=0,
+                                                                                              sticky="w", pady=5)
+    tk.Label(frame_trata, text="Pieza Dental", bg=ROSA_SUAVE, font=("Arial", 10, "bold")).grid(row=1, column=0,
+                                                                                               sticky="w", pady=5)
+    tk.Label(frame_trata, text="Precio (Q)", bg=ROSA_SUAVE, font=("Arial", 10, "bold")).grid(row=2, column=0,
+                                                                                             sticky="w", pady=5)
+    tk.Label(frame_trata, text="Notas", bg=ROSA_SUAVE, font=("Arial", 10, "bold")).grid(row=3, column=0, sticky="w",
+                                                                                        pady=5)
+
+    combo_tratamiento = ttk.Combobox(frame_trata, state="readonly", width=35)
+    combo_tratamiento.grid(row=0, column=1, padx=10)
+
+    entry_pieza = tk.Entry(frame_trata, font=("Arial", 11), width=15)
+    entry_pieza.grid(row=1, column=1, padx=10, sticky="w")
+
+    entry_precio = tk.Entry(frame_trata, font=("Arial", 11), width=15)
+    entry_precio.grid(row=2, column=1, padx=10, sticky="w")
+
+    entry_notas = tk.Entry(frame_trata, font=("Arial", 11), width=37)
+    entry_notas.grid(row=3, column=1, padx=10, sticky="w")
 
     frame_detalle = tk.Frame(ventana, bg=ROSA_SUAVE)
-    frame_detalle.place(x=30, y=300, width=920, height=180)
+    frame_detalle.place(x=30, y=340, width=500, height=200)
 
-    columnas_detalle = ("id", "nombre", "cantidad", "precio", "subtotal")
-    tabla_detalle = ttk.Treeview(frame_detalle, columns=columnas_detalle, show="headings", height=7)
-    tabla_detalle.heading("id", text="ID")
-    tabla_detalle.heading("nombre", text="Producto")
-    tabla_detalle.heading("cantidad", text="Cantidad")
-    tabla_detalle.heading("precio", text="P. Unitario")
-    tabla_detalle.heading("subtotal", text="Subtotal")
+    cols = ("trata", "pieza", "precio")
+    tree_detalle = ttk.Treeview(frame_detalle, columns=cols, show="headings")
+    tree_detalle.heading("trata", text="Tratamiento")
+    tree_detalle.heading("pieza", text="Pieza")
+    tree_detalle.heading("precio", text="Precio")
+    tree_detalle.column("trata", width=250)
+    tree_detalle.column("pieza", width=80, anchor="center")
+    tree_detalle.column("precio", width=100, anchor="e")
+    tree_detalle.pack(side="left", fill="both", expand=True)
 
-    tabla_detalle.column("id", width=60, anchor="center")
-    tabla_detalle.column("nombre", width=260, anchor="w")
-    tabla_detalle.column("cantidad", width=100, anchor="center")
-    tabla_detalle.column("precio", width=130, anchor="center")
-    tabla_detalle.column("subtotal", width=130, anchor="center")
-    tabla_detalle.pack(side="left", fill="both", expand=True)
+    scroll = ttk.Scrollbar(frame_detalle, command=tree_detalle.yview)
+    tree_detalle.config(yscrollcommand=scroll.set)
+    scroll.pack(side="right", fill="y")
 
-    scroll_detalle = ttk.Scrollbar(frame_detalle, orient="vertical", command=tabla_detalle.yview)
-    tabla_detalle.configure(yscrollcommand=scroll_detalle.set)
-    scroll_detalle.pack(side="right", fill="y")
+    frame_hist = tk.LabelFrame(ventana, text="Historial de Presupuestos", bg=ROSA_SUAVE, fg=MORADO)
+    frame_hist.place(x=550, y=60, width=520, height=480)
 
-    frame_historial = tk.Frame(ventana, bg=ROSA_SUAVE)
-    frame_historial.place(x=470, y=70, width=480, height=220)
+    cols_hist = ("id", "fecha", "paciente", "total")
+    tree_hist = ttk.Treeview(frame_hist, columns=cols_hist, show="headings")
+    tree_hist.heading("id", text="ID")
+    tree_hist.heading("fecha", text="Fecha")
+    tree_hist.heading("paciente", text="Paciente")
+    tree_hist.heading("total", text="Total")
 
-    tk.Label(frame_historial, text="Ventas registradas", bg=ROSA_SUAVE, fg=MORADO,
-             font=("Arial", 11, "bold")).pack(anchor="w")
+    tree_hist.column("id", width=50, anchor="center")
+    tree_hist.column("fecha", width=120)
+    tree_hist.column("paciente", width=180)
+    tree_hist.column("total", width=100, anchor="e")
+    tree_hist.pack(fill="both", expand=True)
 
-    columnas_historial = ("id_venta", "fecha", "cliente", "total")
-    tabla_historial = ttk.Treeview(frame_historial, columns=columnas_historial, show="headings", height=8)
-    tabla_historial.heading("id_venta", text="Factura")
-    tabla_historial.heading("fecha", text="Fecha")
-    tabla_historial.heading("cliente", text="Cliente")
-    tabla_historial.heading("total", text="Total")
-    tabla_historial.column("id_venta", width=70, anchor="center")
-    tabla_historial.column("fecha", width=150, anchor="center")
-    tabla_historial.column("cliente", width=150, anchor="w")
-    tabla_historial.column("total", width=90, anchor="center")
-    tabla_historial.pack(fill="both", expand=True)
+    mapa_pacientes = {}
+    mapa_tratamientos = {}
+    items_actuales = []
 
-    productos_mapa = {}
-    lineas = []
+    def cargar_datos():
+        pacientes = buscar_pacientes()
+        vals_pac = []
+        for p in pacientes:
+            texto = f"{p[1]} (NIT:{p[3]})"
+            mapa_pacientes[texto] = p
+            vals_pac.append(texto)
+        combo_pacientes['values'] = vals_pac
 
-    def cargar_productos():
-        nonlocal productos_mapa
-        productos_mapa = {}
-        opciones = []
+        tratas = obtener_tratamientos()
+        vals_trata = []
+        for t in tratas:
+            mapa_tratamientos[t[1]] = t
+            vals_trata.append(t[1])
+        combo_tratamiento['values'] = vals_trata
+
+        hist = obtener_presupuestos_recientes()
+        for item in tree_hist.get_children():
+            tree_hist.delete(item)
+        for h in hist:
+            tree_hist.insert("", "end", values=(h[0], h[1], h[2], f"Q{h[3]:.2f}"))
+
+    def al_seleccionar_paciente(event):
+        texto = combo_pacientes.get()
+        if texto in mapa_pacientes:
+            pac = mapa_pacientes[texto]
+
+    def al_seleccionar_tratamiento(event):
+        nombre = combo_tratamiento.get()
+        if nombre in mapa_tratamientos:
+            precio_base = mapa_tratamientos[nombre][2]
+            entry_precio.delete(0, tk.END)
+            entry_precio.insert(0, str(precio_base))
+
+    def agregar_item():
+        trata_nombre = combo_tratamiento.get()
+        pieza = entry_pieza.get()
         try:
-            for prod in obtener_productos_disponibles():
-                productos_mapa[prod[0]] = {
-                    "id_producto": prod[0],
-                    "nombre": prod[1],
-                    "stock": prod[2],
-                    "precio_unitario": float(prod[3]),
-                }
-                opciones.append(f"{prod[0]} - {prod[1]} (Stock: {prod[2]})")
-        except Exception as exc:
-            messagebox.showerror("Error", str(exc))
+            precio = float(entry_precio.get())
+        except:
+            messagebox.showerror("Error", "Precio inválido")
+            return
+        notas = entry_notas.get()
+
+        if not trata_nombre: return
+
+        id_trata = mapa_tratamientos[trata_nombre][0]
+
+        item = {
+            "id_trata": id_trata,
+            "nombre": trata_nombre,
+            "pieza": pieza,
+            "precio": precio,
+            "notas": notas
+        }
+        items_actuales.append(item)
+
+        tree_detalle.insert("", "end", values=(trata_nombre, pieza, f"Q{precio:.2f}"))
+
+        entry_pieza.delete(0, tk.END)
+        entry_notas.delete(0, tk.END)
+
+    def guardar_presupuesto():
+        pac_texto = combo_pacientes.get()
+        if pac_texto not in mapa_pacientes:
+            messagebox.showerror("Error", "Seleccione un paciente válido")
             return
 
-        combo_producto["values"] = opciones
-        if opciones:
-            combo_producto.current(0)
-
-    def cargar_historial():
-        for item in tabla_historial.get_children():
-            tabla_historial.delete(item)
-
-        try:
-            ventas = obtener_ventas()
-        except Exception as exc:
-            messagebox.showerror("Error", str(exc))
+        if not items_actuales:
+            messagebox.showerror("Error", "Agregue tratamientos primero")
             return
 
-        for venta in ventas:
-            tabla_historial.insert(
-                "",
-                "end",
-                values=(
-                    venta[0],
-                    venta[1],
-                    venta[2],
-                    f"₡{float(venta[6]):.2f}",
-                ),
-            )
-
-    def refrescar_detalle():
-        for item in tabla_detalle.get_children():
-            tabla_detalle.delete(item)
-
-        for linea in lineas:
-            tabla_detalle.insert(
-                "",
-                "end",
-                values=(
-                    linea["id_producto"],
-                    linea["nombre"],
-                    linea["cantidad"],
-                    f"₡{linea['precio_unitario']:.2f}",
-                    f"₡{linea['subtotal']:.2f}",
-                ),
-            )
-
-    def agregar_producto():
-        seleccion = combo_producto.get().strip()
-        if not seleccion:
-            messagebox.showerror("Error", "Debe seleccionar un producto")
-            return
-
-        try:
-            id_producto = int(seleccion.split("-")[0].strip())
-            cantidad = int(entry_cantidad.get().strip())
-        except ValueError:
-            messagebox.showerror("Error", "La cantidad debe ser un número válido")
-            return
-
-        if id_producto not in productos_mapa:
-            messagebox.showerror("Error", "Producto no disponible")
-            return
-
-        if cantidad <= 0:
-            messagebox.showerror("Error", "La cantidad debe ser mayor a cero")
-            return
-
-        producto = productos_mapa[id_producto]
-        if cantidad > producto["stock"]:
-            messagebox.showerror("Error", f"Stock insuficiente. Disponible: {producto['stock']}")
-            return
-
-        subtotal = round(producto["precio_unitario"] * cantidad, 2)
-        lineas.append(
-            {
-                "id_producto": producto["id_producto"],
-                "nombre": producto["nombre"],
-                "cantidad": cantidad,
-                "precio_unitario": producto["precio_unitario"],
-                "subtotal": subtotal,
-            }
-        )
-        refrescar_detalle()
-        entry_cantidad.delete(0, tk.END)
-
-    def facturar_venta():
-        cliente = entry_cliente.get().strip()
-        if not cliente:
-            messagebox.showerror("Error", "El nombre del cliente es obligatorio")
-            return
-
-        if not lineas:
-            messagebox.showerror("Error", "Debe agregar productos al detalle")
-            return
+        id_paciente = mapa_pacientes[pac_texto][0]
 
         try:
-            id_venta, ruta_factura = registrar_venta(
-                cliente=cliente,
-                usuario="Secretaria",
-                lineas=lineas,
-            )
-        except Exception as exc:
-            messagebox.showerror("Error", str(exc))
+            id_pres = crear_presupuesto_cabecera(id_paciente, "UsuarioActual")  # Pasar usuario real si lo tienes
+
+            for it in items_actuales:
+                agregar_detalle_presupuesto(id_pres, it['id_trata'], it['pieza'], it['precio'], it['notas'])
+
+            messagebox.showinfo("Éxito", f"Presupuesto #{id_pres} guardado.")
+
+            items_actuales.clear()
+            for x in tree_detalle.get_children(): tree_detalle.delete(x)
+            combo_pacientes.set("")
+            cargar_datos()
+
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def realizar_cobro():
+        seleccionado = tree_hist.focus()
+        if not seleccionado:
+            messagebox.showwarning("Atención", "Seleccione un presupuesto del historial para cobrar.")
             return
 
-        messagebox.showinfo(
-            "Venta registrada",
-            f"Factura #{id_venta} generada correctamente.\nArchivo: {ruta_factura}",
-        )
+        datos = tree_hist.item(seleccionado, 'values')
+        id_presupuesto = datos[0]
 
-        entry_cliente.delete(0, tk.END)
-        lineas.clear()
-        refrescar_detalle()
-        cargar_productos()
-        cargar_historial()
+        resp = messagebox.askyesno("Confirmar Cobro",
+                                   f"¿Desea registrar el pago del Presupuesto #{id_presupuesto}?")
+        if resp:
+            exito, mensaje = cobrar_presupuesto(id_presupuesto)
 
-    _boton(ventana, "Agregar Producto", agregar_producto, x=30, y=500, w=180)
-    _boton(ventana, "Facturar Venta", facturar_venta, x=230, y=500, w=180)
-    _boton(ventana, "Refrescar", lambda: (cargar_productos(), cargar_historial()), x=430, y=500, w=150)
-    _boton(ventana, "Cerrar", ventana.destroy, x=600, y=500, w=150)
+            if exito:
+                messagebox.showinfo("Pago Registrado", mensaje)
+                cargar_datos()
+            else:
+                messagebox.showerror("Error", mensaje)
 
-    tk.Button(
-        ventana,
-        text="X",
-        bg=MORADO,
-        fg=TEXTO_CLARO,
-        bd=0,
-        font=("Arial", 10, "bold"),
-        command=ventana.destroy,
-    ).place(x=930, y=15, width=35, height=28)
+    btn_cobrar = tk.Button(frame_hist, text="💰 COBRAR SELECCIONADO", bg="green", fg="white",
+                           font=("Arial", 10, "bold"), command=realizar_cobro)
+    btn_cobrar.pack(side="bottom", fill="x", pady=5, padx=5)
 
-    cargar_productos()
-    cargar_historial()
+    combo_pacientes.bind("<<ComboboxSelected>>", al_seleccionar_paciente)
+    combo_tratamiento.bind("<<ComboboxSelected>>", al_seleccionar_tratamiento)
+
+    _boton(ventana, "Agregar (+)", agregar_item, x=370, y=300, w=160, h=30)
+    _boton(ventana, "GUARDAR TODO", guardar_presupuesto, x=30, y=550, w=200, h=40)
+    _boton(ventana, "Cerrar", ventana.destroy, x=250, y=550, w=150, h=40)
+
+    cargar_datos()
