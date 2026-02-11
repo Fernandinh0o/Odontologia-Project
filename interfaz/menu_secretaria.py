@@ -125,6 +125,11 @@ def _boton_sidebar_tk(parent, texto, comando, y, activo=False):
     ).place(x=15, y=y, width=230, height=40)
 
 
+def _limpiar_frame(frame):
+    for widget in frame.winfo_children():
+        widget.destroy()
+
+
 def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
     if rol not in {"Secretaria", "Empleado"}:
         messagebox.showerror(
@@ -297,59 +302,298 @@ def mostrar_menu_secretaria(root, cerrar_app, rol, cerrar_sesion):
         tk.Label(sidebar, text=f"Rol: {rol}", bg=MORADO_SIDEBAR, fg="#F6EFFF",
                  font=("Arial", 11)).place(x=16, y=52)
 
-        _boton_sidebar_tk(sidebar, "🗂  Gestor de Usuarios", gestor_usuarios, y=95)
-        _boton_sidebar_tk(sidebar, "📦  Inventario (Agregar)", gestor_inventario, y=145)
-        _boton_sidebar_tk(sidebar, "📋  Ver Inventario", mostrar_inventario, y=195)
-        _boton_sidebar_tk(sidebar, "💳  Módulo de Ventas", mostrar_modulo_ventas, y=245, activo=True)
+        _boton_sidebar_tk(sidebar, "🗂  Gestor de Usuarios", lambda: cargar_vista("usuarios"), y=95)
+        _boton_sidebar_tk(sidebar, "📦  Inventario (Agregar)", lambda: cargar_vista("inventario"), y=145)
+        _boton_sidebar_tk(sidebar, "📋  Ver Inventario", lambda: cargar_vista("lista_inventario"), y=195)
+        _boton_sidebar_tk(sidebar, "💳  Módulo de Ventas", lambda: cargar_vista("ventas"), y=245, activo=True)
         _boton_sidebar_tk(sidebar, "↩  Cerrar Sesión", cerrar_sesion, y=295)
 
         contenido = tk.Frame(cuerpo, bg=LILA_CONTENIDO)
         contenido.place(x=260, y=0, width=ANCHO - 260, height=ALTO - 58)
-        tk.Label(
+        contenido_dinamico = tk.Frame(
             contenido,
-            text="Panel principal - Secretaría",
-            bg=LILA_CONTENIDO,
-            fg=TEXTO_OSCURO,
-            font=("Arial", 24, "bold"),
-        ).place(x=24, y=20)
-        tk.Label(
-            contenido,
-            text="Selecciona una opción del menú lateral para abrir cada módulo.",
-            bg=LILA_CONTENIDO,
-            fg="#6F558F",
-            font=("Arial", 12),
-        ).place(x=24, y=62)
-
-        tarjeta = tk.Frame(contenido, bg=LILA_PANEL, highlightbackground="#DCCAE8", highlightthickness=1)
-        tarjeta.place(x=24, y=100, width=ANCHO - 310, height=260)
-        tk.Label(
-            tarjeta,
-            text="Accesos rápidos",
             bg=LILA_PANEL,
-            fg=TEXTO_OSCURO,
-            font=("Arial", 15, "bold"),
-        ).place(x=16, y=16)
+            highlightbackground="#DCCAE8",
+            highlightthickness=1,
+        )
+        contenido_dinamico.place(x=24, y=20, width=ANCHO - 310, height=ALTO - 98)
 
-        botones = [
-            ("Abrir gestor de usuarios", gestor_usuarios),
-            ("Agregar producto al inventario", gestor_inventario),
-            ("Ver inventario completo", mostrar_inventario),
-        ]
-        for i, (texto, comando) in enumerate(botones):
-            tk.Button(
-                tarjeta,
-                text=texto,
-                command=comando,
-                bg=FUCSIA_BOTON,
-                activebackground="#790055",
-                fg="#FFFFFF",
-                activeforeground="#FFFFFF",
-                bd=0,
-                font=("Arial", 11, "bold"),
-                cursor="hand2",
-            ).place(x=16, y=56 + (i * 46), width=280, height=32)
+        def cargar_vista(vista):
+            _limpiar_frame(contenido_dinamico)
+
+            if vista == "usuarios":
+                _render_gestor_usuarios(contenido_dinamico)
+            elif vista == "inventario":
+                _render_gestor_inventario(contenido_dinamico)
+            elif vista == "lista_inventario":
+                _render_lista_inventario(contenido_dinamico)
+            elif vista == "ventas":
+                _render_modulo_ventas_placeholder(contenido_dinamico)
+            else:
+                _render_inicio_secretaria(contenido_dinamico)
+
+        cargar_vista("inicio")
 
     ventana.protocol("WM_DELETE_WINDOW", cerrar_sesion)
+
+
+def _render_inicio_secretaria(parent):
+    tk.Label(
+        parent,
+        text="Panel principal - Secretaría",
+        bg=LILA_PANEL,
+        fg=TEXTO_OSCURO,
+        font=("Arial", 22, "bold"),
+    ).place(x=16, y=18)
+    tk.Label(
+        parent,
+        text="Selecciona una opción del menú lateral para ver su contenido aquí.",
+        bg=LILA_PANEL,
+        fg="#6F558F",
+        font=("Arial", 12),
+    ).place(x=16, y=62)
+
+
+def _render_gestor_usuarios(parent):
+    tk.Label(parent, text="Gestor de Usuarios", bg=LILA_PANEL, fg=MORADO,
+             font=("Arial", 18, "bold")).place(x=16, y=16)
+
+    frame_form = tk.Frame(parent, bg=LILA_PANEL)
+    frame_form.place(x=16, y=58, width=280, height=250)
+
+    def label(txt, r):
+        tk.Label(frame_form, text=txt, bg=LILA_PANEL, fg=TEXTO_GRIS,
+                 font=("Arial", 10, "bold")).grid(row=r, column=0, sticky="w", pady=6)
+
+    label("Nombre", 0)
+    label("Teléfono", 1)
+    label("Rol", 2)
+    label("Contraseña", 3)
+    label("Especialidad", 4)
+
+    entry_nombre = tk.Entry(frame_form, bd=0, font=("Arial", 11))
+    entry_tel = tk.Entry(frame_form, bd=0, font=("Arial", 11))
+    entry_rol = tk.Entry(frame_form, bd=0, font=("Arial", 11))
+    entry_pwd = tk.Entry(frame_form, bd=0, font=("Arial", 11), show="*")
+    entry_esp = tk.Entry(frame_form, bd=0, font=("Arial", 11))
+
+    entry_nombre.grid(row=0, column=1, padx=10)
+    entry_tel.grid(row=1, column=1, padx=10)
+    entry_rol.grid(row=2, column=1, padx=10)
+    entry_pwd.grid(row=3, column=1, padx=10)
+    entry_esp.grid(row=4, column=1, padx=10)
+
+    frame_lista = tk.Frame(parent, bg=LILA_PANEL)
+    frame_lista.place(x=305, y=58, width=250, height=300)
+
+    tabla = tk.Listbox(frame_lista, font=("Arial", 9))
+    tabla.pack(side="left", fill="both", expand=True)
+    scrollbar = tk.Scrollbar(frame_lista)
+    scrollbar.pack(side="right", fill="y")
+    tabla.config(yscrollcommand=scrollbar.set)
+    scrollbar.config(command=tabla.yview)
+
+    def cargar():
+        tabla.delete(0, tk.END)
+        for usuario in listar_usuarios():
+            tabla.insert(tk.END, f"{usuario[0]} | {usuario[1]} | {usuario[2]} | {usuario[3]}")
+
+    def crear():
+        datos = {
+            "nombre": entry_nombre.get(),
+            "telefono": entry_tel.get(),
+            "rol": entry_rol.get(),
+            "contrasena": entry_pwd.get(),
+            "especialidad": entry_esp.get(),
+        }
+
+        if not datos["nombre"] or not datos["rol"] or not datos["contrasena"]:
+            messagebox.showerror("Error", "Campos obligatorios faltantes")
+            return
+
+        registrar_usuario(datos)
+        cargar()
+        messagebox.showinfo("OK", "Usuario creado")
+
+    def eliminar():
+        seleccion = tabla.curselection()
+        if not seleccion:
+            return
+
+        linea = tabla.get(seleccion)
+        id_usuario = int(linea.split("|")[0].strip())
+        borrar_usuario(id_usuario)
+        cargar()
+
+    tk.Button(parent, text="Crear", command=crear, bg=FUCSIA_BOTON, fg=TEXTO_CLARO,
+              bd=0, font=("Arial", 10, "bold")).place(x=16, y=330, width=120, height=32)
+    tk.Button(parent, text="Eliminar", command=eliminar, bg=FUCSIA_BOTON, fg=TEXTO_CLARO,
+              bd=0, font=("Arial", 10, "bold")).place(x=148, y=330, width=120, height=32)
+
+    cargar()
+
+
+def _render_gestor_inventario(parent):
+    tk.Label(parent, text="Inventario - Agregar / Actualizar", bg=LILA_PANEL, fg=MORADO,
+             font=("Arial", 16, "bold")).place(x=16, y=16)
+
+    frame_form = tk.Frame(parent, bg=LILA_PANEL)
+    frame_form.place(x=16, y=58, width=540, height=260)
+
+    campos = [
+        "ID Producto", "Nombre", "Categoría", "Cantidad",
+        "Precio Unitario", "Stock Mínimo", "Proveedor", "Descripción",
+    ]
+    entradas = []
+    for i, texto in enumerate(campos):
+        tk.Label(frame_form, text=texto, bg=LILA_PANEL, fg=TEXTO_GRIS,
+                 font=("Arial", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5)
+        entry = tk.Entry(frame_form, bd=0, font=("Arial", 11))
+        entry.grid(row=i, column=1, padx=12)
+        entradas.append(entry)
+
+    def _leer_formulario():
+        valores = [e.get().strip() for e in entradas]
+        if any(not v for v in valores[:7]):
+            messagebox.showerror("Error", "Todos los campos son obligatorios")
+            return None
+        try:
+            return Producto(
+                id_producto=int(valores[0]),
+                nombre=valores[1],
+                categoria=valores[2],
+                cantidad=int(valores[3]),
+                precio_unitario=float(valores[4]),
+                stock_minimo=int(valores[5]),
+                proveedor=valores[6],
+                descripcion=valores[7],
+            )
+        except ValueError:
+            messagebox.showerror("Error", "ID, cantidad, stock mínimo y precio deben ser numéricos")
+            return None
+
+    def _limpiar():
+        for entry in entradas:
+            entry.delete(0, tk.END)
+
+    def guardar():
+        producto = _leer_formulario()
+        if not producto:
+            return
+        try:
+            registrar_producto(producto)
+            messagebox.showinfo("OK", "Producto registrado")
+            _limpiar()
+        except Exception as exc:
+            messagebox.showerror("Error", str(exc))
+
+    def actualizar():
+        producto = _leer_formulario()
+        if not producto:
+            return
+        try:
+            actualizar_producto(producto)
+            messagebox.showinfo("OK", "Producto actualizado")
+            _limpiar()
+        except Exception as exc:
+            messagebox.showerror("Error", str(exc))
+
+    tk.Button(parent, text="Guardar", command=guardar, bg=FUCSIA_BOTON, fg=TEXTO_CLARO,
+              bd=0, font=("Arial", 10, "bold")).place(x=16, y=330, width=120, height=32)
+    tk.Button(parent, text="Actualizar", command=actualizar, bg=FUCSIA_BOTON, fg=TEXTO_CLARO,
+              bd=0, font=("Arial", 10, "bold")).place(x=148, y=330, width=120, height=32)
+
+
+def _render_lista_inventario(parent):
+    tk.Label(parent, text="Inventario - Productos", bg=LILA_PANEL, fg=MORADO,
+             font=("Arial", 17, "bold")).place(x=16, y=16)
+
+    frame_filtros = tk.Frame(parent, bg=LILA_PANEL)
+    frame_filtros.place(x=16, y=54, width=540, height=70)
+
+    tk.Label(frame_filtros, text="Buscar:", bg=LILA_PANEL, fg=TEXTO_GRIS,
+             font=("Arial", 10, "bold")).place(x=0, y=5)
+    entry_buscar = tk.Entry(frame_filtros, font=("Arial", 10))
+    entry_buscar.place(x=60, y=5, width=160)
+
+    var_stock_bajo = tk.BooleanVar()
+    check_bajo = tk.Checkbutton(frame_filtros, text="Solo stock bajo (< 5)",
+                                variable=var_stock_bajo, bg=LILA_PANEL,
+                                activebackground=LILA_PANEL, font=("Arial", 9))
+    check_bajo.place(x=350, y=4)
+
+    frame_tabla = tk.Frame(parent, bg=LILA_PANEL)
+    frame_tabla.place(x=16, y=130, width=540, height=230)
+
+    columnas = ("id", "nombre", "categoria", "cantidad", "precio")
+    tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings")
+    tabla.heading("id", text="ID")
+    tabla.heading("nombre", text="Nombre")
+    tabla.heading("categoria", text="Categoría")
+    tabla.heading("cantidad", text="Cantidad")
+    tabla.heading("precio", text="Precio")
+    tabla.column("id", width=45, anchor="center")
+    tabla.column("nombre", width=180, anchor="w")
+    tabla.column("categoria", width=120, anchor="w")
+    tabla.column("cantidad", width=75, anchor="center")
+    tabla.column("precio", width=95, anchor="center")
+
+    scrollbar = ttk.Scrollbar(frame_tabla, orient="vertical", command=tabla.yview)
+    tabla.configure(yscrollcommand=scrollbar.set)
+    tabla.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    def ejecutar_busqueda():
+        for item in tabla.get_children():
+            tabla.delete(item)
+        try:
+            todos = obtener_productos()
+        except Exception as exc:
+            messagebox.showerror("Error", str(exc))
+            return
+
+        texto_busqueda = entry_buscar.get().lower()
+        solo_bajo = var_stock_bajo.get()
+
+        for prod in todos:
+            if texto_busqueda and texto_busqueda not in str(prod[1]).lower():
+                continue
+            if solo_bajo and int(prod[3]) > 5:
+                continue
+            tabla.insert("", "end", values=(prod[0], prod[1], prod[2], prod[3], f"₡{float(prod[4]):.2f}"))
+
+    tk.Button(frame_filtros, text="Buscar", command=ejecutar_busqueda, bg=FUCSIA_BOTON,
+              fg=TEXTO_CLARO, bd=0, font=("Arial", 9, "bold")).place(x=235, y=3, width=90, height=24)
+
+    entry_buscar.bind("<Return>", lambda e: ejecutar_busqueda())
+    check_bajo.config(command=ejecutar_busqueda)
+    ejecutar_busqueda()
+
+
+def _render_modulo_ventas_placeholder(parent):
+    tk.Label(parent, text="Módulo de Ventas", bg=LILA_PANEL, fg=MORADO,
+             font=("Arial", 20, "bold")).place(x=16, y=18)
+    tk.Label(
+        parent,
+        text="En esta versión, el módulo de ventas se abrirá en la vista integrada próximamente.",
+        bg=LILA_PANEL,
+        fg="#6F558F",
+        font=("Arial", 11),
+        wraplength=500,
+        justify="left",
+    ).place(x=16, y=65)
+    tk.Button(
+        parent,
+        text="Abrir módulo de ventas",
+        command=mostrar_modulo_ventas,
+        bg=FUCSIA_BOTON,
+        fg="#FFFFFF",
+        activebackground="#790055",
+        activeforeground="#FFFFFF",
+        bd=0,
+        font=("Arial", 11, "bold"),
+        cursor="hand2",
+    ).place(x=16, y=120, width=240, height=34)
 
 
 
