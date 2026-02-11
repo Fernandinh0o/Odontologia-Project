@@ -302,7 +302,6 @@ def mostrar_modulo_ventas():
             for x in tree_detalle.get_children(): tree_detalle.delete(x)
             combo_pacientes.set("")
             combo_tratamiento.set("")
-            lbl_seguro.config(text="---", bg=BLANCO, fg=TEXTO_SECUNDARIO)
             entry_precio.delete(0, tk.END)
 
             cargar_datos()
