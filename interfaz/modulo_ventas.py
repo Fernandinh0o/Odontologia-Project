@@ -7,63 +7,194 @@ from gestores.gestor_ventas import (
     registrar_venta,
 )
 
-ROSA_SUAVE = "#E8D4E0"
-TEXTO_CLARO = "#FFFFFF"
-MORADO = "#4B2A6A"
-TEXTO_GRIS = "#5B5B5B"
+FONDO_VENTANA = "#F5EAF1"
+FONDO_PANEL = "#FDF7FA"
+FONDO_TARJETA = "#E8F6FA"
+FONDO_TARJETA_SECUNDARIA = "#F7E9F2"
+ACENTO_PRIMARIO = "#8C78D9"
+ACENTO_SECUNDARIO = "#5EC9D8"
+ACENTO_ACCION = "#FF9FB4"
+TEXTO_PRINCIPAL = "#493B61"
+TEXTO_SECUNDARIO = "#766B8A"
+BLANCO = "#FFFFFF"
 
 
-def _boton(panel, text, command, x, y, w=160, h=35):
-    tk.Button(
-        panel,
-        text=text,
-        bg=MORADO,
-        fg=TEXTO_CLARO,
-        bd=0,
+def _configurar_estilos():
+    style = ttk.Style()
+    style.theme_use("clam")
+
+    style.configure(
+        "Ventas.Treeview",
+        background=BLANCO,
+        foreground=TEXTO_PRINCIPAL,
+        fieldbackground=BLANCO,
+        borderwidth=0,
+        rowheight=30,
+        font=("Arial", 10),
+    )
+    style.configure(
+        "Ventas.Treeview.Heading",
+        background=ACENTO_PRIMARIO,
+        foreground=BLANCO,
         font=("Arial", 10, "bold"),
+        relief="flat",
+    )
+    style.map(
+        "Ventas.Treeview",
+        background=[("selected", "#D9F4F8")],
+        foreground=[("selected", TEXTO_PRINCIPAL)],
+    )
+
+    style.configure(
+        "Ventas.TCombobox",
+        fieldbackground=BLANCO,
+        background=BLANCO,
+        foreground=TEXTO_PRINCIPAL,
+        arrowsize=14,
+        bordercolor="#E0D7E8",
+        relief="flat",
+        padding=5,
+    )
+
+
+def _crear_tarjeta(parent, x, y, w, h, color):
+    tarjeta = tk.Frame(parent, bg=color, highlightthickness=0)
+    tarjeta.place(x=x, y=y, width=w, height=h)
+    return tarjeta
+
+
+def _titulo(parent, text, x, y):
+    tk.Label(
+        parent,
+        text=text,
+        bg=parent.cget("bg"),
+        fg=TEXTO_PRINCIPAL,
+        font=("Arial", 11, "bold"),
+    ).place(x=x, y=y)
+
+
+def _boton(parent, text, command, x, y, w=160, h=38, color=ACENTO_PRIMARIO):
+    tk.Button(
+        parent,
+        text=text,
+        bg=color,
+        fg=BLANCO,
+        activebackground="#7A66C9",
+        activeforeground=BLANCO,
+        bd=0,
+        relief="flat",
+        font=("Arial", 10, "bold"),
+        cursor="hand2",
         command=command,
     ).place(x=x, y=y, width=w, height=h)
+
+
+def _input(parent, x, y, width=260):
+    entrada = tk.Entry(
+        parent,
+        font=("Arial", 11),
+        bd=0,
+        relief="flat",
+        fg=TEXTO_PRINCIPAL,
+        bg=BLANCO,
+        insertbackground=TEXTO_PRINCIPAL,
+    )
+    entrada.place(x=x, y=y, width=width, height=34)
+    return entrada
 
 
 def mostrar_modulo_ventas():
     ventana = tk.Toplevel()
     ventana.title("Módulo de Ventas")
-    ventana.geometry("980x560")
-    ventana.configure(bg=ROSA_SUAVE)
+    ventana.geometry("1040x620")
+    ventana.configure(bg=FONDO_VENTANA)
     ventana.resizable(False, False)
 
+    _configurar_estilos()
+
+    panel = tk.Frame(ventana, bg=FONDO_PANEL)
+    panel.place(x=20, y=20, width=1000, height=580)
+
     tk.Label(
-        ventana,
+        panel,
         text="Facturación de Ventas",
-        bg=ROSA_SUAVE,
-        fg=MORADO,
-        font=("Arial", 16, "bold"),
-    ).place(x=30, y=20)
+        bg=FONDO_PANEL,
+        fg=TEXTO_PRINCIPAL,
+        font=("Arial", 22, "bold"),
+    ).place(x=28, y=20)
 
-    frame_form = tk.Frame(ventana, bg=ROSA_SUAVE)
-    frame_form.place(x=30, y=70, width=420, height=220)
+    tk.Label(
+        panel,
+        text="Interfaz de facturación rápida con estética suave",
+        bg=FONDO_PANEL,
+        fg=TEXTO_SECUNDARIO,
+        font=("Arial", 10),
+    ).place(x=30, y=55)
 
-    tk.Label(frame_form, text="Cliente", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 10, "bold")).grid(row=0, column=0, sticky="w", pady=8)
-    tk.Label(frame_form, text="Producto", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 10, "bold")).grid(row=1, column=0, sticky="w", pady=8)
-    tk.Label(frame_form, text="Cantidad", bg=ROSA_SUAVE, fg=TEXTO_GRIS,
-             font=("Arial", 10, "bold")).grid(row=2, column=0, sticky="w", pady=8)
+    frame_form = _crear_tarjeta(panel, x=28, y=92, w=430, h=218, color=FONDO_TARJETA_SECUNDARIA)
+    _titulo(frame_form, "Datos de la venta", 16, 14)
 
-    entry_cliente = tk.Entry(frame_form, font=("Arial", 11))
-    entry_cliente.grid(row=0, column=1, padx=10)
+    tk.Label(
+        frame_form,
+        text="Cliente",
+        bg=FONDO_TARJETA_SECUNDARIA,
+        fg=TEXTO_SECUNDARIO,
+        font=("Arial", 10, "bold"),
+    ).place(x=18, y=56)
+    tk.Label(
+        frame_form,
+        text="Producto",
+        bg=FONDO_TARJETA_SECUNDARIA,
+        fg=TEXTO_SECUNDARIO,
+        font=("Arial", 10, "bold"),
+    ).place(x=18, y=104)
+    tk.Label(
+        frame_form,
+        text="Cantidad",
+        bg=FONDO_TARJETA_SECUNDARIA,
+        fg=TEXTO_SECUNDARIO,
+        font=("Arial", 10, "bold"),
+    ).place(x=18, y=152)
 
-    combo_producto = ttk.Combobox(frame_form, state="readonly", width=30)
-    combo_producto.grid(row=1, column=1, padx=10)
+    entry_cliente = _input(frame_form, x=110, y=50, width=300)
 
-    entry_cantidad = tk.Entry(frame_form, font=("Arial", 11))
-    entry_cantidad.grid(row=2, column=1, padx=10)
+    combo_producto = ttk.Combobox(frame_form, state="readonly", style="Ventas.TCombobox")
+    combo_producto.place(x=110, y=98, width=300, height=34)
 
-    frame_detalle = tk.Frame(ventana, bg=ROSA_SUAVE)
-    frame_detalle.place(x=30, y=300, width=920, height=180)
+    entry_cantidad = _input(frame_form, x=110, y=146, width=300)
+
+    frame_historial = _crear_tarjeta(panel, x=474, y=92, w=496, h=218, color=FONDO_TARJETA)
+    _titulo(frame_historial, "Ventas registradas", 16, 14)
+
+    columnas_historial = ("id_venta", "fecha", "cliente", "total")
+    tabla_historial = ttk.Treeview(
+        frame_historial,
+        columns=columnas_historial,
+        show="headings",
+        style="Ventas.Treeview",
+        height=6,
+    )
+    tabla_historial.heading("id_venta", text="Factura")
+    tabla_historial.heading("fecha", text="Fecha")
+    tabla_historial.heading("cliente", text="Cliente")
+    tabla_historial.heading("total", text="Total")
+    tabla_historial.column("id_venta", width=75, anchor="center")
+    tabla_historial.column("fecha", width=160, anchor="center")
+    tabla_historial.column("cliente", width=170, anchor="w")
+    tabla_historial.column("total", width=85, anchor="e")
+    tabla_historial.place(x=16, y=48, width=464, height=154)
+
+    frame_detalle = _crear_tarjeta(panel, x=28, y=328, w=942, h=194, color="#ECFAFD")
+    _titulo(frame_detalle, "Detalle de la factura", 16, 12)
 
     columnas_detalle = ("id", "nombre", "cantidad", "precio", "subtotal")
-    tabla_detalle = ttk.Treeview(frame_detalle, columns=columnas_detalle, show="headings", height=7)
+    tabla_detalle = ttk.Treeview(
+        frame_detalle,
+        columns=columnas_detalle,
+        show="headings",
+        style="Ventas.Treeview",
+        height=5,
+    )
     tabla_detalle.heading("id", text="ID")
     tabla_detalle.heading("nombre", text="Producto")
     tabla_detalle.heading("cantidad", text="Cantidad")
@@ -71,36 +202,34 @@ def mostrar_modulo_ventas():
     tabla_detalle.heading("subtotal", text="Subtotal")
 
     tabla_detalle.column("id", width=60, anchor="center")
-    tabla_detalle.column("nombre", width=260, anchor="w")
-    tabla_detalle.column("cantidad", width=100, anchor="center")
-    tabla_detalle.column("precio", width=130, anchor="center")
-    tabla_detalle.column("subtotal", width=130, anchor="center")
-    tabla_detalle.pack(side="left", fill="both", expand=True)
+    tabla_detalle.column("nombre", width=350, anchor="w")
+    tabla_detalle.column("cantidad", width=120, anchor="center")
+    tabla_detalle.column("precio", width=150, anchor="e")
+    tabla_detalle.column("subtotal", width=150, anchor="e")
+    tabla_detalle.place(x=16, y=46, width=904, height=132)
 
-    scroll_detalle = ttk.Scrollbar(frame_detalle, orient="vertical", command=tabla_detalle.yview)
-    tabla_detalle.configure(yscrollcommand=scroll_detalle.set)
-    scroll_detalle.pack(side="right", fill="y")
-
-    frame_historial = tk.Frame(ventana, bg=ROSA_SUAVE)
-    frame_historial.place(x=470, y=70, width=480, height=220)
-
-    tk.Label(frame_historial, text="Ventas registradas", bg=ROSA_SUAVE, fg=MORADO,
-             font=("Arial", 11, "bold")).pack(anchor="w")
-
-    columnas_historial = ("id_venta", "fecha", "cliente", "total")
-    tabla_historial = ttk.Treeview(frame_historial, columns=columnas_historial, show="headings", height=8)
-    tabla_historial.heading("id_venta", text="Factura")
-    tabla_historial.heading("fecha", text="Fecha")
-    tabla_historial.heading("cliente", text="Cliente")
-    tabla_historial.heading("total", text="Total")
-    tabla_historial.column("id_venta", width=70, anchor="center")
-    tabla_historial.column("fecha", width=150, anchor="center")
-    tabla_historial.column("cliente", width=150, anchor="w")
-    tabla_historial.column("total", width=90, anchor="center")
-    tabla_historial.pack(fill="both", expand=True)
+    total_var = tk.StringVar(value="₡0.00")
+    tk.Label(
+        panel,
+        text="Total actual:",
+        bg=FONDO_PANEL,
+        fg=TEXTO_SECUNDARIO,
+        font=("Arial", 10, "bold"),
+    ).place(x=736, y=534)
+    tk.Label(
+        panel,
+        textvariable=total_var,
+        bg=FONDO_PANEL,
+        fg=ACENTO_PRIMARIO,
+        font=("Arial", 14, "bold"),
+    ).place(x=824, y=530)
 
     productos_mapa = {}
     lineas = []
+
+    def actualizar_total():
+        total = sum(linea["subtotal"] for linea in lineas)
+        total_var.set(f"₡{total:.2f}")
 
     def cargar_productos():
         nonlocal productos_mapa
@@ -161,6 +290,8 @@ def mostrar_modulo_ventas():
                     f"₡{linea['subtotal']:.2f}",
                 ),
             )
+
+        actualizar_total()
 
     def agregar_producto():
         seleccion = combo_producto.get().strip()
@@ -232,20 +363,32 @@ def mostrar_modulo_ventas():
         cargar_productos()
         cargar_historial()
 
-    _boton(ventana, "Agregar Producto", agregar_producto, x=30, y=500, w=180)
-    _boton(ventana, "Facturar Venta", facturar_venta, x=230, y=500, w=180)
-    _boton(ventana, "Refrescar", lambda: (cargar_productos(), cargar_historial()), x=430, y=500, w=150)
-    _boton(ventana, "Cerrar", ventana.destroy, x=600, y=500, w=150)
+    _boton(panel, "Agregar producto", agregar_producto, x=30, y=532, w=170, color=ACENTO_SECUNDARIO)
+    _boton(panel, "Facturar venta", facturar_venta, x=214, y=532, w=170, color=ACENTO_PRIMARIO)
+    _boton(
+        panel,
+        "Refrescar",
+        lambda: (cargar_productos(), cargar_historial()),
+        x=398,
+        y=532,
+        w=150,
+        color="#7DB7E5",
+    )
+    _boton(panel, "Cerrar", ventana.destroy, x=562, y=532, w=150, color=ACENTO_ACCION)
 
     tk.Button(
-        ventana,
-        text="X",
-        bg=MORADO,
-        fg=TEXTO_CLARO,
+        panel,
+        text="✕",
+        bg=ACENTO_PRIMARIO,
+        fg=BLANCO,
+        activebackground="#7A66C9",
+        activeforeground=BLANCO,
         bd=0,
-        font=("Arial", 10, "bold"),
+        font=("Arial", 11, "bold"),
+        cursor="hand2",
         command=ventana.destroy,
-    ).place(x=930, y=15, width=35, height=28)
+    ).place(x=950, y=16, width=32, height=28)
 
     cargar_productos()
     cargar_historial()
+
