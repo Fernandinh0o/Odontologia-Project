@@ -2,7 +2,7 @@ from sqlite3 import Error
 from database.conexion import crear_conexion
 
 
-def registrar_paciente(nombre, telefono, nit, tiene_seguro, aseguradora):
+def registrar_paciente(nombre, telefono, nit):
     conn = crear_conexion()
     if conn is None:
         return False, "No hay conexión con la base de datos"
@@ -10,9 +10,9 @@ def registrar_paciente(nombre, telefono, nit, tiene_seguro, aseguradora):
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Pacientes (nombre, telefono, nit, tiene_seguro, aseguradora)
-            VALUES (?, ?, ?, ?, ?)
-        """, (nombre, telefono, nit, tiene_seguro, aseguradora))
+            INSERT INTO Pacientes (nombre, telefono, nit)
+            VALUES (?, ?, ?)
+        """, (nombre, telefono, nit))
         conn.commit()
         return True, "Paciente registrado correctamente."
     except Error as e:
