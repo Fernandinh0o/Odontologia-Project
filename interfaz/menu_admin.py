@@ -3,6 +3,7 @@ from tkinter import messagebox
 
 from interfaz.menu_secretaria import gestor_inventario, gestor_usuarios, mostrar_inventario
 from interfaz.modulo_ventas import mostrar_modulo_ventas
+from interfaz.rrhh_historial_vista import RRHHHistorialVista
 from interfaz.rrhh_vista import RRHHVista
 
 ANCHO = 900
@@ -93,6 +94,13 @@ def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
         contenido_dinamico.grid_rowconfigure(0, weight=1)
         contenido_dinamico.grid_columnconfigure(0, weight=1)
 
+    def mostrar_historial_pagos():
+        limpiar_contenido()
+        vista = RRHHHistorialVista(contenido_dinamico)
+        vista.grid(row=0, column=0, sticky="nsew")
+        contenido_dinamico.grid_rowconfigure(0, weight=1)
+        contenido_dinamico.grid_columnconfigure(0, weight=1)
+
     def mostrar_en_desarrollo():
         messagebox.showinfo("En desarrollo", "Función en desarrollo")
 
@@ -102,7 +110,8 @@ def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
     _boton_sidebar(sidebar, "💳  Módulo de Ventas", mostrar_modulo_ventas, y=245)
     _boton_sidebar(sidebar, "🗓  Agenda", mostrar_en_desarrollo, y=295)
     _boton_sidebar(sidebar, "🧾  Gestión de Nómina", mostrar_rrhh, y=345, activo=True)
-    _boton_sidebar(sidebar, "↩  Cerrar Sesión", cerrar_sesion, y=395)
+    _boton_sidebar(sidebar, "📋  Historial de Pagos", mostrar_historial_pagos, y=395)
+    _boton_sidebar(sidebar, "↩  Cerrar Sesión", cerrar_sesion, y=445)
 
     mostrar_inicio()
     ventana.protocol("WM_DELETE_WINDOW", cerrar_sesion)
