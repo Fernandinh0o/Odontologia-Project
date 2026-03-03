@@ -114,6 +114,19 @@ def crear_tablas_iniciales():
             descripcion TEXT
         );
         """
+    sql_tabla_nomina = """
+        CREATE TABLE IF NOT EXISTS Nominas (
+            id_pago INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_usuario INTEGER NOT NULL,
+            fecha DATE DEFAULT (DATE('now')),
+            concepto TEXT NOT NULL,
+            monto_base REAL NOT NULL,
+            bonificaciones REAL DEFAULT 0,
+            deducciones REAL DEFAULT 0,
+            total_pagado REAL NOT NULL,
+            FOREIGN KEY(id_usuario) REFERENCES Usuarios(id_usuario)
+        );
+        """
 
     def insertar_datos_prueba(cursor):
         cursor.execute("SELECT COUNT(*) FROM Tratamientos")
@@ -160,6 +173,7 @@ def crear_tablas_iniciales():
             cursor.execute(sql_tabla_presupuestos)
             cursor.execute(sql_tabla_detalle_presupuesto)
             cursor.execute(sql_tabla_pagos_gastos)
+            cursor.execute(sql_tabla_nomina)
 
             insertar_datos_prueba(cursor)
 
