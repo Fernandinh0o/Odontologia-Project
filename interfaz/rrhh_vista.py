@@ -6,7 +6,8 @@ from gestores.gestor_rrhh import calcular_nomina_teorica, obtener_empleados, reg
 MORADO = "#4B2A6A"
 FONDO = "#FFFFFF"
 TEXTO = "#3D2A57"
-IVA_PEQUENO_CONTRIBUYENTE = 0.05
+
+IGSS_PATRONAL = 0.1267
 
 
 class RRHHVista(tk.Frame):
@@ -146,16 +147,24 @@ class RRHHVista(tk.Frame):
             salario_base, comisiones, otros_descuentos, _ = self._leer_valores()
 
             calculo = calcular_nomina_teorica(salario_base, comisiones)
-            ingresos_brutos = salario_base + comisiones
-            iva_a_pagar = ingresos_brutos * IVA_PEQUENO_CONTRIBUYENTE
+
+            total_devengado = salario_base + comisiones
+            igss_laboral = calculo["igss_laboral"]
+            bono_ley = calculo["bono_ley"]
+            igss_patronal = total_devengado * IGSS_PATRONAL
+            total_descuentos = igss_laboral + otros_descuentos
             total_liquido = calculo["total_liquido"] - otros_descuentos
+            costo_empresa = total_devengado + bono_ley + igss_patronal
 
             self.label_resultado.config(
                 text=(
-                    f"IGSS: Q{calculo['igss_laboral']:.2f}\n"
-                    f"Bono Ley: Q{calculo['bono_ley']:.2f}\n"
-                    f"IVA (5% Pequeño Contribuyente): Q{iva_a_pagar:.2f}\n"
-                    f"Total Líquido (con descuentos): Q{total_liquido:.2f}"
+                    f"Total Devengado: Q{total_devengado:.2f}\n"
+                    f"IGSS Laboral: Q{igss_laboral:.2f}\n"
+                    f"IGSS Patronal: Q{igss_patronal:.2f}\n"
+                    f"Bono Ley: Q{bono_ley:.2f}\n"
+                    f"Total Descuentos: Q{total_descuentos:.2f}\n"
+                    f"Total Líquido: Q{total_liquido:.2f}\n"
+                    f"Costo Total Empresa: Q{costo_empresa:.2f}"
                 )
             )
         except ValueError as exc:
