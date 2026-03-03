@@ -6,6 +6,7 @@ from gestores.gestor_rrhh import calcular_nomina_teorica, obtener_empleados, reg
 MORADO = "#4B2A6A"
 FONDO = "#FFFFFF"
 TEXTO = "#3D2A57"
+IVA_PEQUENO_CONTRIBUYENTE = 0.05
 
 
 class RRHHVista(tk.Frame):
@@ -18,21 +19,27 @@ class RRHHVista(tk.Frame):
 
     def _crear_interfaz(self):
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=2)
+        self.grid_rowconfigure(7, weight=1)
 
         tk.Label(
             self,
             text="Gestión de Nómina",
             bg=FONDO,
             fg=MORADO,
-            font=("Arial", 20, "bold"),
-        ).grid(row=0, column=0, columnspan=2, sticky="w", padx=18, pady=(18, 12))
+            font=("Arial", 24, "bold"),
+        ).grid(row=0, column=0, columnspan=2, sticky="w", padx=30, pady=(30, 20))
 
-        tk.Label(self, text="Empleado", bg=FONDO, fg=MORADO, font=("Arial", 11, "bold")).grid(
-            row=1, column=0, sticky="w", padx=18, pady=6
-        )
-        self.combo_empleado = ttk.Combobox(self, state="readonly", width=48)
-        self.combo_empleado.grid(row=1, column=1, sticky="ew", padx=18, pady=6)
+        tk.Label(
+            self,
+            text="Empleado",
+            bg=FONDO,
+            fg=MORADO,
+            font=("Arial", 13, "bold"),
+        ).grid(row=1, column=0, sticky="w", padx=30, pady=10)
+
+        self.combo_empleado = ttk.Combobox(self, state="readonly")
+        self.combo_empleado.grid(row=1, column=1, sticky="ew", padx=30, pady=10)
         self.combo_empleado.bind("<<ComboboxSelected>>", self._on_empleado_selected)
 
         self.entry_base = self._crear_campo("Salario Base", 2)
@@ -41,7 +48,7 @@ class RRHHVista(tk.Frame):
         self.entry_concepto = self._crear_campo("Concepto", 5, "Pago mensual")
 
         botones = tk.Frame(self, bg=FONDO)
-        botones.grid(row=6, column=0, columnspan=2, sticky="w", padx=18, pady=8)
+        botones.grid(row=6, column=0, columnspan=2, sticky="w", padx=30, pady=20)
 
         tk.Button(
             botones,
@@ -49,12 +56,12 @@ class RRHHVista(tk.Frame):
             command=self._calcular_nomina,
             bg=MORADO,
             fg=FONDO,
-            activebackground=MORADO,
-            activeforeground=FONDO,
             bd=0,
-            font=("Arial", 11, "bold"),
+            font=("Arial", 13, "bold"),
             cursor="hand2",
-        ).grid(row=0, column=0, padx=(0, 10), ipadx=16, ipady=5)
+            padx=25,
+            pady=8,
+        ).grid(row=0, column=0, padx=(0, 15))
 
         tk.Button(
             botones,
@@ -62,38 +69,53 @@ class RRHHVista(tk.Frame):
             command=self._registrar_pago,
             bg=MORADO,
             fg=FONDO,
-            activebackground=MORADO,
-            activeforeground=FONDO,
             bd=0,
-            font=("Arial", 11, "bold"),
+            font=("Arial", 13, "bold"),
             cursor="hand2",
-        ).grid(row=0, column=1, ipadx=16, ipady=5)
+            padx=25,
+            pady=8,
+        ).grid(row=0, column=1)
 
         self.label_resultado = tk.Label(
             self,
             text="",
             bg=FONDO,
             fg=TEXTO,
-            font=("Arial", 11),
+            font=("Arial", 13),
             justify="left",
-            anchor="w",
+            anchor="nw",
         )
-        self.label_resultado.grid(row=7, column=0, columnspan=2, sticky="ew", padx=18, pady=(16, 20), ipady=8)
+        self.label_resultado.grid(
+            row=7,
+            column=0,
+            columnspan=2,
+            sticky="nsew",
+            padx=30,
+            pady=(20, 30),
+        )
 
     def _crear_campo(self, etiqueta, fila, valor_inicial=""):
-        tk.Label(self, text=etiqueta, bg=FONDO, fg=MORADO, font=("Arial", 11, "bold")).grid(
-            row=fila, column=0, sticky="w", padx=18, pady=6
-        )
-        entry = tk.Entry(self, font=("Arial", 11), fg=TEXTO, relief="solid", bd=1)
-        entry.grid(row=fila, column=1, sticky="ew", padx=18, pady=6)
+        tk.Label(
+            self,
+            text=etiqueta,
+            bg=FONDO,
+            fg=MORADO,
+            font=("Arial", 13, "bold"),
+        ).grid(row=fila, column=0, sticky="w", padx=30, pady=10)
+
+        entry = tk.Entry(self, font=("Arial", 13), fg=TEXTO, relief="solid", bd=1)
+        entry.grid(row=fila, column=1, sticky="ew", padx=30, pady=10)
+
         if valor_inicial:
             entry.insert(0, valor_inicial)
+
         return entry
 
     def _cargar_empleados(self):
         empleados = obtener_empleados()
         self.empleados_map = {f"{emp[0]} - {emp[1]} ({emp[2]})": emp[0] for emp in empleados}
         self.combo_empleado["values"] = list(self.empleados_map.keys())
+
         if self.empleados_map:
             primera_opcion = next(iter(self.empleados_map))
             self.combo_empleado.set(primera_opcion)
@@ -122,13 +144,17 @@ class RRHHVista(tk.Frame):
     def _calcular_nomina(self):
         try:
             salario_base, comisiones, otros_descuentos, _ = self._leer_valores()
+
             calculo = calcular_nomina_teorica(salario_base, comisiones)
+            ingresos_brutos = salario_base + comisiones
+            iva_a_pagar = ingresos_brutos * IVA_PEQUENO_CONTRIBUYENTE
             total_liquido = calculo["total_liquido"] - otros_descuentos
 
             self.label_resultado.config(
                 text=(
                     f"IGSS: Q{calculo['igss_laboral']:.2f}\n"
                     f"Bono Ley: Q{calculo['bono_ley']:.2f}\n"
+                    f"IVA (5% Pequeño Contribuyente): Q{iva_a_pagar:.2f}\n"
                     f"Total Líquido (con descuentos): Q{total_liquido:.2f}"
                 )
             )

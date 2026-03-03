@@ -8,13 +8,11 @@ from gestores.usuarios_gestor import (
 from database.tablas import crear_tablas_iniciales
 from modelos.usuario import Usuario
 
-""" Aqui se reciben los datos de la interfaz, llama al gestor y devuelvce los resultados, ademas como no usa sql
-llama practicamente a funciones que si lo hacen todo lo primero practicamente"""
 
 def iniciar_sistema():
     crear_tablas_iniciales()
     inicializar_bd()
-#Aqui inicia el programa y garantiza las tablas.
+
 
 def registrar_usuario(datos):
     usuario = Usuario(
@@ -24,7 +22,7 @@ def registrar_usuario(datos):
         contrasena=datos["contrasena"],
         especialidad=datos.get("especialidad"),
     )
-    crear_usuario(usuario)  #SAe guarda en la base ded atos
+    crear_usuario(usuario)
 
 
 def autenticar(nombre, contrasena):

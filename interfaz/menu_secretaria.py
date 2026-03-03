@@ -18,8 +18,8 @@ from interfaz.modulo_ventas import mostrar_modulo_ventas
 
 
 
-ANCHO = 900
-ALTO = 520
+ANCHO = 1200
+ALTO = 700
 
 ROSA_SUAVE = "#E8D4E0"
 TEXTO_CLARO = "#FFFFFF"

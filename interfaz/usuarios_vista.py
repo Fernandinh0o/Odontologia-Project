@@ -30,13 +30,12 @@ REMEMBER_FILE = "remember_me.json"
 
 
 def _get_logo_path():
-    # Tu logo está en: interfaz/logo.png (según tu proyecto)
     base_dir = os.path.dirname(os.path.abspath(__file__))
     p1 = os.path.join(base_dir, "logo.png")
     if os.path.exists(p1):
         return p1
 
-    # fallback opcional (si algún día lo mueves a raíz/img/)
+
     p2 = os.path.join(base_dir, "..", "img", "logo_clinica_dental.png")
     if os.path.exists(p2):
         return p2

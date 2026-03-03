@@ -6,9 +6,6 @@ from interfaz.modulo_ventas import mostrar_modulo_ventas
 from interfaz.rrhh_historial_vista import RRHHHistorialVista
 from interfaz.rrhh_vista import RRHHVista
 
-ANCHO = 900
-ALTO = 520
-
 MORADO_HEADER = "#5C2D91"
 MORADO_SIDEBAR = "#6A3BA0"
 LILA_CONTENIDO = "#F3ECF8"
@@ -20,12 +17,15 @@ MORADO = "#4B2A6A"
 def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
     ventana = tk.Toplevel(root)
     ventana.title("Menú Odontólogo")
-    ventana.geometry(f"{ANCHO}x{ALTO}")
     ventana.configure(bg=MORADO_HEADER)
-    ventana.resizable(False, False)
+
+    ventana.state("zoomed")
+    ventana.minsize(900, 600)
+    ventana.resizable(True, True)
 
     cabecera = tk.Frame(ventana, bg=MORADO_HEADER, height=58)
     cabecera.pack(fill="x", side="top")
+
     tk.Label(
         cabecera,
         text="☰  Clínica Dental",
@@ -37,8 +37,11 @@ def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
     cuerpo = tk.Frame(ventana, bg=LILA_CONTENIDO)
     cuerpo.pack(fill="both", expand=True)
 
-    sidebar = tk.Frame(cuerpo, bg=MORADO_SIDEBAR)
-    sidebar.place(x=0, y=0, width=260, height=ALTO - 58)
+    cuerpo.grid_columnconfigure(1, weight=1)
+    cuerpo.grid_rowconfigure(0, weight=1)
+
+    sidebar = tk.Frame(cuerpo, bg=MORADO_SIDEBAR, width=260)
+    sidebar.grid(row=0, column=0, sticky="ns")
 
     tk.Label(
         sidebar,
@@ -46,17 +49,21 @@ def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
         bg=MORADO_SIDEBAR,
         fg="#F1DBFF",
         font=("Arial", 16, "bold"),
-    ).place(x=16, y=20)
+    ).pack(pady=(20, 5), anchor="w", padx=16)
+
     tk.Label(
         sidebar,
         text="Rol: Odontólogo",
         bg=MORADO_SIDEBAR,
         fg="#F6EFFF",
         font=("Arial", 11),
-    ).place(x=16, y=52)
+    ).pack(anchor="w", padx=16)
 
     contenido = tk.Frame(cuerpo, bg=LILA_CONTENIDO)
-    contenido.place(x=260, y=0, width=ANCHO - 260, height=ALTO - 58)
+    contenido.grid(row=0, column=1, sticky="nsew")
+
+    contenido.grid_rowconfigure(0, weight=1)
+    contenido.grid_columnconfigure(0, weight=1)
 
     contenido_dinamico = tk.Frame(
         contenido,
@@ -64,7 +71,7 @@ def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
         highlightbackground="#DCCAE8",
         highlightthickness=1,
     )
-    contenido_dinamico.place(x=24, y=20, width=ANCHO - 310, height=ALTO - 98)
+    contenido_dinamico.grid(row=0, column=0, padx=24, pady=20, sticky="nsew")
 
     def limpiar_contenido():
         for widget in contenido_dinamico.winfo_children():
@@ -78,51 +85,48 @@ def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
             bg=LILA_PANEL,
             fg=MORADO,
             font=("Arial", 22, "bold"),
-        ).place(x=16, y=18)
+        ).pack(anchor="nw", padx=16, pady=(18, 5))
+
         tk.Label(
             contenido_dinamico,
             text="Selecciona una opción del menú lateral para abrir cada módulo.",
             bg=LILA_PANEL,
             fg="#6F558F",
             font=("Arial", 12),
-        ).place(x=16, y=62)
+        ).pack(anchor="nw", padx=16)
 
     def mostrar_rrhh():
         limpiar_contenido()
         vista = RRHHVista(contenido_dinamico)
-        vista.grid(row=0, column=0, sticky="nsew")
-        contenido_dinamico.grid_rowconfigure(0, weight=1)
-        contenido_dinamico.grid_columnconfigure(0, weight=1)
+        vista.pack(fill="both", expand=True)
 
     def mostrar_historial_pagos():
         limpiar_contenido()
         vista = RRHHHistorialVista(contenido_dinamico)
-        vista.grid(row=0, column=0, sticky="nsew")
-        contenido_dinamico.grid_rowconfigure(0, weight=1)
-        contenido_dinamico.grid_columnconfigure(0, weight=1)
+        vista.pack(fill="both", expand=True)
 
     def mostrar_en_desarrollo():
         messagebox.showinfo("En desarrollo", "Función en desarrollo")
 
-    _boton_sidebar(sidebar, "🗂  Gestor de Usuarios", gestor_usuarios, y=95)
-    _boton_sidebar(sidebar, "📦  Inventario (Agregar)", gestor_inventario, y=145)
-    _boton_sidebar(sidebar, "📋  Ver Inventario", mostrar_inventario, y=195)
-    _boton_sidebar(sidebar, "💳  Módulo de Ventas", mostrar_modulo_ventas, y=245)
-    _boton_sidebar(sidebar, "🗓  Agenda", mostrar_en_desarrollo, y=295)
-    _boton_sidebar(sidebar, "🧾  Gestión de Nómina", mostrar_rrhh, y=345, activo=True)
-    _boton_sidebar(sidebar, "📋  Historial de Pagos", mostrar_historial_pagos, y=395)
-    _boton_sidebar(sidebar, "↩  Cerrar Sesión", cerrar_sesion, y=445)
+    _boton_sidebar(sidebar, "🗂  Gestor de Usuarios", gestor_usuarios)
+    _boton_sidebar(sidebar, "📦  Inventario (Agregar)", gestor_inventario)
+    _boton_sidebar(sidebar, "📋  Ver Inventario", mostrar_inventario)
+    _boton_sidebar(sidebar, "💳  Módulo de Ventas", mostrar_modulo_ventas)
+    _boton_sidebar(sidebar, "🗓  Agenda", mostrar_en_desarrollo)
+    _boton_sidebar(sidebar, "🧾  Gestión de Nómina", mostrar_rrhh, activo=True)
+    _boton_sidebar(sidebar, "📋  Historial de Pagos", mostrar_historial_pagos)
+    _boton_sidebar(sidebar, "↩  Cerrar Sesión", cerrar_sesion)
 
     mostrar_inicio()
     ventana.protocol("WM_DELETE_WINDOW", cerrar_sesion)
 
 
-def _boton_sidebar(parent, texto, comando, y, activo=False):
+def _boton_sidebar(parent, texto, comando, activo=False):
     color_texto = "#FFFFFF" if activo else "#D8EBF5"
     color_fondo = FUCSIA_ACCENTO if activo else MORADO_SIDEBAR
     color_hover = "#83005F" if activo else "#5A3186"
 
-    tk.Button(
+    btn = tk.Button(
         parent,
         text=texto,
         command=comando,
@@ -135,4 +139,5 @@ def _boton_sidebar(parent, texto, comando, y, activo=False):
         padx=14,
         font=("Arial", 10, "bold"),
         cursor="hand2",
-    ).place(x=15, y=y, width=230, height=40)
+    )
+    btn.pack(fill="x", padx=15, pady=5, ipady=10)
