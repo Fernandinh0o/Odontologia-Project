@@ -8,6 +8,11 @@ TIPO_PAGO_TRATAMIENTO = "Pago Tratamiento"
 TIPO_ABONO_SEGURO = "Abono Seguro"
 
 
+def _asegurar_tablas_caja():
+    ok, _ = crear_tablas_caja()
+    return ok
+
+
 def crear_tablas_caja():
     """
     Crea las tablas mínimas para operar caja de ingresos.
@@ -19,6 +24,20 @@ def crear_tablas_caja():
 
     try:
         cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS Pacientes (
+                id_paciente INTEGER PRIMARY KEY,
+                nombre TEXT NOT NULL,
+                telefono TEXT,
+                nit TEXT,
+                tiene_seguro BOOLEAN DEFAULT 0,
+                aseguradora TEXT,
+                poliza TEXT
+            )
+            """
+        )
 
         cursor.execute(
             """
@@ -89,6 +108,8 @@ def registrar_pago_tratamiento(id_paciente, id_cita, monto, metodo_pago="Efectiv
     """
     if monto <= 0:
         return False, "El monto debe ser mayor que cero"
+    if not _asegurar_tablas_caja():
+        return False, "No fue posible preparar tablas de caja"
 
     conn = crear_conexion()
     if conn is None:
@@ -142,6 +163,8 @@ def registrar_abono_seguro(id_paciente, monto, referencia=None, observaciones=""
     """
     if monto <= 0:
         return False, "El monto debe ser mayor que cero"
+    if not _asegurar_tablas_caja():
+        return False, "No fue posible preparar tablas de caja"
 
     conn = crear_conexion()
     if conn is None:
@@ -189,6 +212,9 @@ def obtener_ingresos(fecha_inicio=None, fecha_fin=None, id_paciente=None):
     Consulta ingresos registrados en caja.
     Permite filtrar por rango de fechas y paciente.
     """
+    if not _asegurar_tablas_caja():
+        return []
+
     conn = crear_conexion()
     if conn is None:
         return []
@@ -238,9 +264,12 @@ def obtener_total_ingresos(fecha_inicio=None, fecha_fin=None):
     """
     Retorna el total de ingresos para el rango de fechas indicado.
     """
+    if not _asegurar_tablas_caja():
+        return 0.0
+
     conn = crear_conexion()
     if conn is None:
-        return 0
+        return 0.0
 
     try:
         cursor = conn.cursor()
@@ -257,6 +286,87 @@ def obtener_total_ingresos(fecha_inicio=None, fecha_fin=None):
         cursor.execute(sql, tuple(parametros))
         return cursor.fetchone()[0]
     except Error:
-        return 0
+        return 0.0
+    finally:
+        conn.close()
+
+
+def obtener_total_ingresos_historico():
+    """
+    Retorna el total histórico acumulado de ingresos registrados en caja.
+    """
+    if not _asegurar_tablas_caja():
+        return 0.0
+
+    conn = crear_conexion()
+    if conn is None:
+        return 0.0
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COALESCE(SUM(monto), 0) FROM Ingresos_Caja")
+        return float(cursor.fetchone()[0] or 0.0)
+    except Error:
+        return 0.0
+    finally:
+        conn.close()
+
+
+def obtener_ingresos_estado_resultados():
+    """
+    Retorna los ingresos del mes actual para estado de resultados.
+    """
+    if not _asegurar_tablas_caja():
+        return {
+            "ingresos_tratamientos": 0.0,
+            "ingresos_seguros": 0.0,
+            "ingresos_totales": 0.0,
+            "ingresos_historico": 0.0,
+        }
+
+    conn = crear_conexion()
+    if conn is None:
+        return {
+            "ingresos_tratamientos": 0.0,
+            "ingresos_seguros": 0.0,
+            "ingresos_totales": 0.0,
+            "ingresos_historico": 0.0,
+        }
+
+    try:
+        cursor = conn.cursor()
+        mes_actual = datetime.now().strftime("%m")
+        anio_actual = datetime.now().strftime("%Y")
+
+        cursor.execute(
+            """
+            SELECT
+                COALESCE(SUM(CASE WHEN tipo_ingreso = ? THEN monto ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN tipo_ingreso = ? THEN monto ELSE 0 END), 0)
+            FROM Ingresos_Caja
+            WHERE strftime('%m', fecha_registro) = ?
+              AND strftime('%Y', fecha_registro) = ?
+            """,
+            (TIPO_PAGO_TRATAMIENTO, TIPO_ABONO_SEGURO, mes_actual, anio_actual),
+        )
+
+        ingresos_tratamientos, ingresos_seguros = cursor.fetchone()
+        ingresos_tratamientos = float(ingresos_tratamientos or 0.0)
+        ingresos_seguros = float(ingresos_seguros or 0.0)
+        ingresos_totales = ingresos_tratamientos + ingresos_seguros
+
+        return {
+            "ingresos_tratamientos": ingresos_tratamientos,
+            "ingresos_seguros": ingresos_seguros,
+            "ingresos_totales": ingresos_totales,
+            "ingresos_historico": obtener_total_ingresos_historico(),
+        }
+    except Error:
+        return {
+            "ingresos_tratamientos": 0.0,
+            "ingresos_seguros": 0.0,
+            "ingresos_totales": 0.0,
+            "ingresos_historico": 0.0,
+        }
     finally:
         conn.close()
