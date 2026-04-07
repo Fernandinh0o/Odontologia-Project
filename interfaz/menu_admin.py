@@ -5,6 +5,7 @@ from interfaz.menu_secretaria import gestor_inventario, gestor_usuarios, mostrar
 from interfaz.modulo_ventas import mostrar_modulo_ventas
 from interfaz.rrhh_historial_vista import RRHHHistorialVista
 from interfaz.rrhh_vista import RRHHVista
+from interfaz.ingresos_odontologo_vista import IngresosOdontologoVista
 
 MORADO_HEADER = "#5C2D91"
 MORADO_SIDEBAR = "#6A3BA0"
@@ -105,6 +106,12 @@ def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
         vista = RRHHHistorialVista(contenido_dinamico)
         vista.pack(fill="both", expand=True)
 
+    def abrir_modulo_ingresos():
+        for widget in contenido_dinamico.winfo_children():
+            widget.destroy()
+        vista = IngresosOdontologoVista(contenido_dinamico)
+        vista.pack(fill="both", expand=True)
+
     def mostrar_en_desarrollo():
         messagebox.showinfo("En desarrollo", "Función en desarrollo")
 
@@ -114,6 +121,7 @@ def mostrar_menu_admin(root, cerrar_app, cerrar_sesion):
     _boton_sidebar(sidebar, "💳  Módulo de Ventas", mostrar_modulo_ventas)
     _boton_sidebar(sidebar, "🗓  Agenda", mostrar_en_desarrollo)
     _boton_sidebar(sidebar, "🧾  Gestión de Nómina", mostrar_rrhh, activo=True)
+    _boton_sidebar(sidebar, "💵  Gestión de Ingresos", abrir_modulo_ingresos)
     _boton_sidebar(sidebar, "📋  Historial de Pagos", mostrar_historial_pagos)
     _boton_sidebar(sidebar, "↩  Cerrar Sesión", cerrar_sesion)
 
